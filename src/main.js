@@ -9,6 +9,7 @@ import RecipeDataSource from './js/recipeData.js';
 import Recipe from './js/recipe.js';
 import Router from './js/router.js';
 import MealPlanner from './js/mealPlanner.js';
+import APISettings from './js/apiSettings.js';
 
 // App state
 class KitoweoApp {  constructor() {
@@ -16,6 +17,7 @@ class KitoweoApp {  constructor() {
     this.recipe = new Recipe(this.dataSource);
     this.router = new Router();
     this.mealPlanner = new MealPlanner(this.dataSource);
+    this.apiSettings = new APISettings(this.dataSource);
 
     this.init();
   }
@@ -49,6 +51,7 @@ class KitoweoApp {  constructor() {
               <a href="#recipes" class="nav-link">Recipes</a>
               <a href="#meal-planner" class="nav-link">Meal Planner</a>
               <a href="#shopping-list" class="nav-link">Shopping List</a>
+              <a href="#settings" class="nav-link">Settings</a>
             </div>
             <button class="mobile-menu-btn">☰</button>
           </div>
@@ -96,14 +99,17 @@ class KitoweoApp {  constructor() {
     switch (route) {
       case 'home':
         this.loadHomePage();
-        break;      case 'recipes':
+        break;
+      case 'recipes':
         this.loadRecipesPage(queryParams);
         break;
       case 'meal-planner':
         this.loadMealPlannerPage();
-        break;
-      case 'shopping-list':
+        break;      case 'shopping-list':
         this.loadShoppingListPage();
+        break;
+      case 'settings':
+        this.loadSettingsPage();
         break;
       case 'recipe':
         if (params[0]) {
@@ -326,7 +332,6 @@ class KitoweoApp {  constructor() {
       });
     });
   }
-
   async loadRecipes(searchQuery = '', initialParams = {}) {
     try {
       const loadingSpinner = qs('#loading-spinner');
@@ -337,15 +342,19 @@ class KitoweoApp {  constructor() {
       loadingSpinner.style.display = 'block';
       recipesGrid.style.display = 'none';
 
+      // Build search options for API
+      const searchOptions = this.buildSearchOptions(initialParams);
+
       // Get recipes based on search query
       let recipes;
       if (searchQuery) {
-        recipes = await this.dataSource.searchRecipes(searchQuery);
+        recipes = await this.dataSource.searchRecipes(searchQuery, searchOptions);
         qs('#results-title').textContent = `Search Results for "${searchQuery}"`;
       } else {
         recipes = await this.dataSource.getAllRecipes();
         qs('#results-title').textContent = 'All Recipes';
       }
+
       // Apply any initial category filter
       if (initialParams.category) {
         // Set the appropriate meal filter button as active
@@ -361,8 +370,10 @@ class KitoweoApp {  constructor() {
         }
       }
 
-      // Apply current filters
-      recipes = this.filterRecipes(recipes);
+      // Apply current UI filters if using mock data or as additional filtering
+      if (!this.dataSource.useAPI || searchOptions.additionalFiltering) {
+        recipes = this.filterRecipes(recipes);
+      }
 
       // Update results count
       resultsCount.textContent = `${recipes.length} recipes found`;
@@ -379,11 +390,80 @@ class KitoweoApp {  constructor() {
       const loadingSpinner = qs('#loading-spinner');
       loadingSpinner.innerHTML = `
         <div class="error-state">
-          <p>Sorry, we couldn't load the recipes. Please try again.</p>
+          <p>Sorry, we couldn't load the recipes. ${error.message}</p>
           <button class="btn btn-primary" onclick="location.reload()">Retry</button>
         </div>
       `;
     }
+  }
+
+  /**
+   * Build search options for Spoonacular API based on current filters
+   */
+  buildSearchOptions(initialParams = {}) {
+    const options = {};
+
+    // Get active filters from UI
+    const activeMealFilter = document.querySelector('[data-type="meal"].active');
+    const activeDietFilters = document.querySelectorAll('[data-type="diet"].active');
+    const activeTimeFilter = document.querySelector('[data-type="time"].active');
+    const sortValue = qs('#sort-select')?.value || 'relevance';
+
+    // Map meal type filter to Spoonacular API
+    if (activeMealFilter && activeMealFilter.getAttribute('data-filter') !== 'all') {
+      const mealType = activeMealFilter.getAttribute('data-filter');
+      options.type = mealType;
+    } else if (initialParams.category) {
+      options.type = initialParams.category;
+    }
+
+    // Map diet filters to Spoonacular API
+    if (activeDietFilters.length > 0) {
+      const dietTypes = Array.from(activeDietFilters).map((btn) => {
+        const filter = btn.getAttribute('data-filter');
+        // Map our filter names to Spoonacular diet names
+        switch (filter) {
+          case 'gluten-free': return 'glutenFree';
+          case 'keto': return 'ketogenic';
+          default: return filter;
+        }
+      });
+      options.diet = dietTypes.join(',');
+    }
+
+    // Map time filter to Spoonacular API
+    if (activeTimeFilter) {
+      const timeFilter = activeTimeFilter.getAttribute('data-filter');
+      switch (timeFilter) {
+        case 'quick':
+          options.maxReadyTime = 30;
+          break;
+        case 'medium':
+          options.maxReadyTime = 60;
+          break;
+        case 'long':
+          // For "long" recipes, we don't set a max time
+          break;
+      }
+    }
+
+    // Map sort options to Spoonacular API
+    switch (sortValue) {
+      case 'time':
+        options.sort = 'time';
+        break;
+      case 'calories':
+        options.sort = 'calories';
+        break;
+      case 'rating':
+        options.sort = 'popularity';
+        break;
+      default:
+        options.sort = 'relevance';
+        break;
+    }
+
+    return options;
   }
 
   async applyFilters() {
@@ -456,7 +536,7 @@ class KitoweoApp {  constructor() {
   async loadMealPlannerPage() {
     try {
       const mainContent = qs('#main-content');
-      
+
       mainContent.innerHTML = `
         <section class="meal-planner-hero">
           <div class="container">
@@ -478,10 +558,9 @@ class KitoweoApp {  constructor() {
 
       // Initialize and render the meal planner
       await this.mealPlanner.renderMealPlanner('.meal-planner-container');
-      
     } catch (error) {
       console.error('Error loading meal planner page:', error);
-      
+
       const mainContent = qs('#main-content');
       mainContent.innerHTML = `
         <section class="error-section">
@@ -651,10 +730,10 @@ class KitoweoApp {  constructor() {
   async loadShoppingListPage() {
     try {
       const mainContent = qs('#main-content');
-      
+
       // Get ingredients from meal planner
       const ingredients = this.mealPlanner.extractIngredientsFromWeek();
-      
+
       mainContent.innerHTML = `
         <section class="shopping-list-hero">
           <div class="container">
@@ -676,13 +755,16 @@ class KitoweoApp {  constructor() {
                 </div>
               </div>
               
-              ${ingredients.length > 0 ? `
+              ${
+                ingredients.length > 0
+                  ? `
                 <div class="shopping-list">
                   <div class="ingredient-categories">
                     ${this.renderIngredientCategories(ingredients)}
                   </div>
                 </div>
-              ` : `
+              `
+                  : `
                 <div class="empty-shopping-list">
                   <div class="empty-state">
                     <h3>No items in your shopping list</h3>
@@ -690,12 +772,12 @@ class KitoweoApp {  constructor() {
                     <a href="#meal-planner" class="btn btn-primary">Plan Meals</a>
                   </div>
                 </div>
-              `}
+              `
+              }
             </div>
           </div>
         </section>
       `;
-      
     } catch (error) {
       console.error('Error loading shopping list page:', error);
     }
@@ -704,23 +786,43 @@ class KitoweoApp {  constructor() {
   renderIngredientCategories(ingredients) {
     // Group ingredients by category (mock categories for now)
     const categories = {
-      'Produce': [],
+      Produce: [],
       'Meat & Seafood': [],
       'Dairy & Eggs': [],
-      'Pantry': [],
-      'Other': []
+      Pantry: [],
+      Other: [],
     };
 
-    ingredients.forEach(ingredient => {
+    ingredients.forEach((ingredient) => {
       // Simple categorization logic (in a real app, this would be more sophisticated)
       const name = ingredient.name.toLowerCase();
-      if (name.includes('chicken') || name.includes('beef') || name.includes('fish') || name.includes('meat')) {
+      if (
+        name.includes('chicken') ||
+        name.includes('beef') ||
+        name.includes('fish') ||
+        name.includes('meat')
+      ) {
         categories['Meat & Seafood'].push(ingredient);
-      } else if (name.includes('milk') || name.includes('cheese') || name.includes('egg') || name.includes('butter')) {
+      } else if (
+        name.includes('milk') ||
+        name.includes('cheese') ||
+        name.includes('egg') ||
+        name.includes('butter')
+      ) {
         categories['Dairy & Eggs'].push(ingredient);
-      } else if (name.includes('tomato') || name.includes('onion') || name.includes('lettuce') || name.includes('apple')) {
+      } else if (
+        name.includes('tomato') ||
+        name.includes('onion') ||
+        name.includes('lettuce') ||
+        name.includes('apple')
+      ) {
         categories['Produce'].push(ingredient);
-      } else if (name.includes('flour') || name.includes('oil') || name.includes('salt') || name.includes('pepper')) {
+      } else if (
+        name.includes('flour') ||
+        name.includes('oil') ||
+        name.includes('salt') ||
+        name.includes('pepper')
+      ) {
         categories['Pantry'].push(ingredient);
       } else {
         categories['Other'].push(ingredient);
@@ -729,24 +831,70 @@ class KitoweoApp {  constructor() {
 
     return Object.entries(categories)
       .filter(([category, items]) => items.length > 0)
-      .map(([category, items]) => `
+      .map(
+        ([category, items]) => `
         <div class="ingredient-category">
           <h3 class="category-title">${category}</h3>
           <div class="ingredient-list">
-            ${items.map(ingredient => `
+            ${items
+              .map(
+                (ingredient) => `
               <div class="ingredient-item">
                 <label class="ingredient-label">
                   <input type="checkbox" class="ingredient-checkbox">
                   <span class="ingredient-text">${ingredient.amount} ${ingredient.name}</span>
                 </label>
               </div>
-            `).join('')}
+            `
+              )
+              .join('')}
           </div>
         </div>
-      `).join('');
+      `
+      )
+      .join('');
   }
 
-  // ...existing code...
+  async loadSettingsPage() {
+    try {
+      const mainContent = qs('#main-content');
+      
+      mainContent.innerHTML = `
+        <section class="settings-hero">
+          <div class="container">
+            <div class="hero-content text-center">              <h1>API Settings</h1>
+              <p class="text-secondary">Configure your Spoonacular API integration using environment variables</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <div class="container">
+            <div class="settings-container">
+              <!-- Settings will be rendered here -->
+            </div>
+          </div>
+        </section>
+      `;
+
+      // Initialize and render the API settings
+      await this.apiSettings.renderAPISettings('.settings-container');
+      
+    } catch (error) {
+      console.error('Error loading settings page:', error);
+      
+      const mainContent = qs('#main-content');
+      mainContent.innerHTML = `
+        <section class="error-section">
+          <div class="container text-center">
+            <h1>Settings Unavailable</h1>
+            <p>We couldn't load the settings page. Please try again.</p>
+            <button class="btn btn-primary" onclick="location.reload()">Retry</button>
+          </div>
+        </section>
+      `;
+    }
+  }
 }
 
 // Initialize the app when DOM is loaded

@@ -1,13 +1,261 @@
 /**
  * Recipe data service for Kitoweo app
  * Handles all recipe-related API calls and data management
+ * Integrates with Spoonacular API and provides fallback to mock data
  */
 
-const BASE_URL = 'https://api.kitoweo.com'; // This would be your actual API endpoint
+import SpoonacularAPI from './spoonacularAPI.js';
 
 export default class RecipeDataSource {
   constructor() {
-    // For now, we'll use mock data. In production, this would connect to your API
+    this.spoonacularAPI = new SpoonacularAPI();
+    this.useAPI = true; // Set to false to use mock data only
+    this.mockDataFallback = true; // Use mock data when API fails
+    
+    this.initializeMockData();
+  }
+
+  /**
+   * Toggle between API and mock data
+   */
+  setUseAPI(useAPI) {
+    this.useAPI = useAPI;
+  }
+
+  /**
+   * Search for recipes with filters
+   */
+  async searchRecipes(query = '', options = {}) {
+    if (this.useAPI) {
+      try {
+        console.log('Searching recipes via Spoonacular API...');
+        const result = await this.spoonacularAPI.searchRecipes(query, {
+          number: options.number || 12,
+          diet: options.diet,
+          cuisine: options.cuisine,
+          type: options.type,
+          maxReadyTime: options.maxReadyTime,
+          sort: options.sort
+        });
+        return result.recipes;
+      } catch (error) {
+        console.error('Spoonacular API search failed:', error);
+        if (this.mockDataFallback) {
+          console.log('Falling back to mock data...');
+          return this.searchMockRecipes(query, options);
+        }
+        throw error;
+      }
+    }
+    
+    return this.searchMockRecipes(query, options);
+  }
+
+  /**
+   * Get all available recipes
+   */
+  async getAllRecipes() {
+    if (this.useAPI) {
+      try {
+        console.log('Fetching popular recipes via Spoonacular API...');
+        const result = await this.spoonacularAPI.searchRecipes('', {
+          number: 24,
+          sort: 'popularity'
+        });
+        return result.recipes;
+      } catch (error) {
+        console.error('Spoonacular API failed:', error);
+        if (this.mockDataFallback) {
+          console.log('Falling back to mock data...');
+          return this.mockRecipes;
+        }
+        throw error;
+      }
+    }
+    
+    return this.mockRecipes;
+  }
+
+  /**
+   * Get featured recipes for homepage
+   */
+  async getFeaturedRecipes(count = 3) {
+    if (this.useAPI) {
+      try {
+        console.log('Fetching featured recipes via Spoonacular API...');
+        const recipes = await this.spoonacularAPI.getRandomRecipes(count, 'healthy,popular');
+        return recipes;
+      } catch (error) {
+        console.error('Spoonacular API failed:', error);
+        if (this.mockDataFallback) {
+          console.log('Falling back to mock data...');
+          return this.mockRecipes.slice(0, count);
+        }
+        throw error;
+      }
+    }
+    
+    return this.mockRecipes.slice(0, count);
+  }
+
+  /**
+   * Get a specific recipe by ID
+   */
+  async getRecipeById(id) {
+    if (this.useAPI && typeof id === 'number' && id > 1000) {
+      try {
+        console.log(`Fetching recipe ${id} via Spoonacular API...`);
+        return await this.spoonacularAPI.getRecipeDetails(id);
+      } catch (error) {
+        console.error('Spoonacular API failed:', error);
+        if (this.mockDataFallback) {
+          console.log('Falling back to mock data...');
+          return this.mockRecipes.find(recipe => recipe.id == id);
+        }
+        throw error;
+      }
+    }
+    
+    // For mock data or small IDs, use mock recipes
+    return this.mockRecipes.find(recipe => recipe.id == id);
+  }
+
+  /**
+   * Search recipes by ingredients
+   */
+  async searchByIngredients(ingredients) {
+    if (this.useAPI) {
+      try {
+        console.log('Searching by ingredients via Spoonacular API...');
+        return await this.spoonacularAPI.searchByIngredients(ingredients);
+      } catch (error) {
+        console.error('Spoonacular API failed:', error);
+        if (this.mockDataFallback) {
+          console.log('Falling back to mock data...');
+          return this.searchMockByIngredients(ingredients);
+        }
+        throw error;
+      }
+    }
+    
+    return this.searchMockByIngredients(ingredients);
+  }
+
+  /**
+   * Get recipe categories
+   */
+  getCategories() {
+    return [
+      { id: 'breakfast', name: 'Breakfast', icon: '🍳' },
+      { id: 'lunch', name: 'Lunch', icon: '🥗' },
+      { id: 'dinner', name: 'Dinner', icon: '🍽️' },
+      { id: 'dessert', name: 'Desserts', icon: '🍰' },
+      { id: 'snack', name: 'Snacks', icon: '🥨' },
+      { id: 'drink', name: 'Drinks', icon: '🥤' }
+    ];
+  }
+
+  /**
+   * Search mock recipes (fallback method)
+   */
+  searchMockRecipes(query = '', options = {}) {
+    let results = [...this.mockRecipes];
+    
+    // Apply text search
+    if (query) {
+      const searchTerm = query.toLowerCase();
+      results = results.filter(recipe => 
+        recipe.title.toLowerCase().includes(searchTerm) ||
+        recipe.description.toLowerCase().includes(searchTerm) ||
+        recipe.tags.some(tag => tag.toLowerCase().includes(searchTerm)) ||
+        recipe.ingredients.some(ing => ing.name.toLowerCase().includes(searchTerm))
+      );
+    }
+
+    // Apply dietary filters
+    if (options.dietaryInfo && options.dietaryInfo.length > 0) {
+      results = results.filter(recipe =>
+        options.dietaryInfo.some(diet =>
+          recipe.dietaryInfo.includes(diet.toLowerCase())
+        )
+      );
+    }
+
+    // Apply category filter
+    if (options.category) {
+      results = results.filter(recipe =>
+        recipe.category === options.category.toLowerCase()
+      );
+    }
+
+    return results;
+  }
+
+  /**
+   * Search mock recipes by ingredients
+   */
+  searchMockByIngredients(ingredients) {
+    const searchTerms = ingredients.map(ing => ing.toLowerCase());
+    
+    return this.mockRecipes.filter(recipe =>
+      searchTerms.some(term =>
+        recipe.ingredients.some(ingredient =>
+          ingredient.name.toLowerCase().includes(term)
+        )
+      )
+    );
+  }
+  /**
+   * Get API status and usage information
+   */
+  async getAPIStatus() {
+    const apiStatus = this.spoonacularAPI.getStatus();
+    
+    if (!this.useAPI) {
+      return { 
+        status: 'disabled', 
+        configured: apiStatus.configured,
+        usingMockData: true,
+        message: 'Using mock data only'
+      };
+    }
+
+    if (!apiStatus.configured) {
+      return {
+        status: 'not-configured',
+        configured: false,
+        usingMockData: this.mockDataFallback,
+        message: 'API key not configured. Check your .env file.'
+      };
+    }
+
+    try {
+      // Test API connection with a minimal request
+      await this.spoonacularAPI.searchRecipes('test', { number: 1 });
+      
+      return {
+        status: 'active',
+        configured: true,
+        usingMockData: false,
+        message: 'API is working correctly',
+        apiKey: apiStatus.apiKey,
+        cacheSize: apiStatus.cacheSize
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        configured: apiStatus.configured,
+        usingMockData: this.mockDataFallback,
+        error: error.message,
+        message: `API error: ${error.message}`
+      };
+    }
+  }
+
+  /**
+   * Initialize mock data for fallback
+   */
+  initializeMockData() {
     this.mockRecipes = [
       {
         id: 1,
@@ -170,17 +418,87 @@ export default class RecipeDataSource {
 
   // Future methods for when you have a real API
   async createRecipe(recipeData) {
-    // Would make POST request to API
+    // Would make POST request to API    ];
+  }
+
+  /**
+   * Clear API cache
+   */
+  clearCache() {
+    if (this.spoonacularAPI) {
+      this.spoonacularAPI.clearCache();
+    }
+  }
+
+  /**
+   * Get popular recipes by category
+   */
+  async getRecipesByCategory(category, count = 12) {
+    if (this.useAPI) {
+      try {
+        console.log(`Fetching ${category} recipes via Spoonacular API...`);
+        const result = await this.spoonacularAPI.searchRecipes('', {
+          type: category,
+          number: count,
+          sort: 'popularity'
+        });
+        return result.recipes;
+      } catch (error) {
+        console.error('Spoonacular API failed:', error);
+        if (this.mockDataFallback) {
+          console.log('Falling back to mock data...');
+          return this.mockRecipes.filter(recipe => 
+            recipe.category === category.toLowerCase()
+          ).slice(0, count);
+        }
+        throw error;
+      }
+    }
+    
+    return this.mockRecipes.filter(recipe => 
+      recipe.category === category.toLowerCase()
+    ).slice(0, count);
+  }
+
+  /**
+   * Get recipe nutrition information
+   */
+  async getRecipeNutrition(recipeId) {
+    if (this.useAPI && typeof recipeId === 'number' && recipeId > 1000) {
+      try {
+        return await this.spoonacularAPI.getRecipeNutrition(recipeId);
+      } catch (error) {
+        console.error('Failed to fetch nutrition:', error);
+        return null;
+      }
+    }
+    
+    // Return mock nutrition data for mock recipes
+    return {
+      calories: 350,
+      protein: 25,
+      carbs: 40,
+      fat: 15,
+      fiber: 8,
+      sugar: 12
+    };
+  }
+
+  /**
+   * Legacy methods for backward compatibility
+   */
+  async createRecipe(recipeData) {
     console.log('Creating recipe:', recipeData);
+    // In a real app, this would save to your backend
   }
 
   async updateRecipe(id, recipeData) {
-    // Would make PUT request to API
     console.log('Updating recipe:', id, recipeData);
+    // In a real app, this would update your backend
   }
 
   async deleteRecipe(id) {
-    // Would make DELETE request to API
     console.log('Deleting recipe:', id);
+    // In a real app, this would delete from your backend
   }
 }

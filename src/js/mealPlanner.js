@@ -16,14 +16,14 @@ export default class MealPlanner {
     const today = new Date();
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay() + 1); // Monday
-    
+
     const week = [];
     for (let i = 0; i < 7; i++) {
       const day = new Date(startOfWeek);
       day.setDate(startOfWeek.getDate() + i);
       week.push(day);
     }
-    
+
     return week;
   }
 
@@ -34,17 +34,17 @@ export default class MealPlanner {
 
   createEmptyMealPlan() {
     const mealPlan = {};
-    
-    this.currentWeek.forEach(date => {
+
+    this.currentWeek.forEach((date) => {
       const dateKey = this.formatDateKey(date);
       mealPlan[dateKey] = {
         breakfast: null,
         lunch: null,
         dinner: null,
-        snacks: []
+        snacks: [],
       };
     });
-    
+
     return mealPlan;
   }
 
@@ -53,10 +53,10 @@ export default class MealPlanner {
   }
 
   formatDisplayDate(date) {
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'short', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
     });
   }
 
@@ -66,7 +66,7 @@ export default class MealPlanner {
 
   async renderMealPlanner(container) {
     const plannerContainer = typeof container === 'string' ? qs(container) : container;
-    
+
     plannerContainer.innerHTML = `
       <div class="meal-planner">
         <div class="planner-header">
@@ -110,33 +110,43 @@ export default class MealPlanner {
       <div class="calendar-grid">
         <div class="calendar-header">
           <div class="time-slot"></div>
-          ${this.currentWeek.map((date, index) => `
+          ${this.currentWeek
+            .map(
+              (date, index) => `
             <div class="day-header">
               <div class="day-name">${days[index]}</div>
               <div class="day-date">${date.getDate()}</div>
             </div>
-          `).join('')}
+          `
+            )
+            .join('')}
         </div>
         
-        ${mealTypes.map(mealType => `
+        ${mealTypes
+          .map(
+            (mealType) => `
           <div class="meal-row">
             <div class="meal-label">
               <h4>${this.capitalizeFirst(mealType)}</h4>
             </div>
-            ${this.currentWeek.map(date => {
-              const dateKey = this.formatDateKey(date);
-              const meal = this.mealPlan[dateKey]?.[mealType];
-              
-              return `
+            ${this.currentWeek
+              .map((date) => {
+                const dateKey = this.formatDateKey(date);
+                const meal = this.mealPlan[dateKey]?.[mealType];
+
+                return `
                 <div class="meal-slot" 
                      data-date="${dateKey}" 
                      data-meal-type="${mealType}">
                   ${meal ? this.renderMealItem(meal) : this.renderEmptySlot()}
                 </div>
               `;
-            }).join('')}
+              })
+              .join('')}
           </div>
-        `).join('')}
+        `
+          )
+          .join('')}
       </div>
     `;
   }
@@ -178,8 +188,10 @@ export default class MealPlanner {
     try {
       const recipes = await this.dataSource.getFeaturedRecipes(6);
       const quickRecipesContainer = qs('#quick-recipes');
-      
-      quickRecipesContainer.innerHTML = recipes.map(recipe => `
+
+      quickRecipesContainer.innerHTML = recipes
+        .map(
+          (recipe) => `
         <div class="quick-recipe-card" data-recipe-id="${recipe.id}">
           <img src="${recipe.image}" alt="${recipe.title}" class="quick-recipe-image">
           <div class="quick-recipe-info">
@@ -193,8 +205,9 @@ export default class MealPlanner {
             Add to Plan
           </button>
         </div>
-      `).join('');
-      
+      `
+        )
+        .join('');
     } catch (error) {
       console.error('Error loading quick add recipes:', error);
     }
@@ -204,7 +217,7 @@ export default class MealPlanner {
     // Week navigation
     const prevWeekBtn = qs('#prev-week', container);
     const nextWeekBtn = qs('#next-week', container);
-    
+
     prevWeekBtn.addEventListener('click', () => this.navigateWeek(-1));
     nextWeekBtn.addEventListener('click', () => this.navigateWeek(1));
 
@@ -233,7 +246,7 @@ export default class MealPlanner {
   }
   navigateWeek(direction) {
     const daysToAdd = direction * 7;
-    this.currentWeek = this.currentWeek.map(date => {
+    this.currentWeek = this.currentWeek.map((date) => {
       const newDate = new Date(date);
       newDate.setDate(date.getDate() + daysToAdd);
       return newDate;
@@ -241,23 +254,23 @@ export default class MealPlanner {
 
     // Load meal plan for new week
     this.mealPlan = { ...this.mealPlan, ...this.createEmptyMealPlan() };
-    
+
     // Re-render the meal planner
     this.renderMealPlanner('.meal-planner-container');
   }
 
   clearWeek() {
     if (confirm('Are you sure you want to clear all meals for this week?')) {
-      this.currentWeek.forEach(date => {
+      this.currentWeek.forEach((date) => {
         const dateKey = this.formatDateKey(date);
         this.mealPlan[dateKey] = {
           breakfast: null,
           lunch: null,
           dinner: null,
-          snacks: []
+          snacks: [],
         };
       });
-        this.saveMealPlan();
+      this.saveMealPlan();
       this.renderMealPlanner('.meal-planner-container');
       alertMessage('Week cleared successfully!');
     }
@@ -265,7 +278,7 @@ export default class MealPlanner {
   async handleAddMeal(mealSlot) {
     const date = mealSlot.getAttribute('data-date');
     const mealType = mealSlot.getAttribute('data-meal-type');
-    
+
     // Show recipe selection modal
     await this.showRecipeSelectionModal(date, mealType);
   }
@@ -273,7 +286,7 @@ export default class MealPlanner {
   handleRemoveMeal(mealSlot) {
     const date = mealSlot.getAttribute('data-date');
     const mealType = mealSlot.getAttribute('data-meal-type');
-    
+
     if (confirm('Remove this meal from your plan?')) {
       this.removeMealFromPlan(date, mealType);
     }
@@ -283,10 +296,10 @@ export default class MealPlanner {
     if (!this.mealPlan[date]) {
       this.mealPlan[date] = { breakfast: null, lunch: null, dinner: null, snacks: [] };
     }
-    
+
     this.mealPlan[date][mealType] = recipe;
     this.saveMealPlan();
-      // Re-render the specific meal slot
+    // Re-render the specific meal slot
     this.renderMealPlanner('.meal-planner-container');
     alertMessage(`${recipe.title} added to ${mealType}!`);
   }
@@ -295,7 +308,7 @@ export default class MealPlanner {
     if (this.mealPlan[date]) {
       this.mealPlan[date][mealType] = null;
       this.saveMealPlan();
-        // Re-render the meal planner
+      // Re-render the meal planner
       this.renderMealPlanner('.meal-planner-container');
       alertMessage('Meal removed from plan');
     }
@@ -311,7 +324,7 @@ export default class MealPlanner {
 
   generateShoppingList() {
     const ingredients = this.extractIngredientsFromWeek();
-    
+
     if (ingredients.length === 0) {
       alertMessage('No meals planned for this week. Add some recipes to generate a shopping list.');
       return;
@@ -320,20 +333,20 @@ export default class MealPlanner {
     // For now, just log - in a full app, this would navigate to shopping list
     console.log('Shopping list ingredients:', ingredients);
     alertMessage('Shopping list generated! (Check console for details)');
-    
+
     // Navigate to shopping list page
     window.location.hash = '#shopping-list';
   }
 
   extractIngredientsFromWeek() {
     const allIngredients = [];
-    
-    this.currentWeek.forEach(date => {
+
+    this.currentWeek.forEach((date) => {
       const dateKey = this.formatDateKey(date);
       const dayMeals = this.mealPlan[dateKey];
-      
+
       if (dayMeals) {
-        ['breakfast', 'lunch', 'dinner'].forEach(mealType => {
+        ['breakfast', 'lunch', 'dinner'].forEach((mealType) => {
           const meal = dayMeals[mealType];
           if (meal && meal.ingredients) {
             allIngredients.push(...meal.ingredients);
@@ -341,14 +354,14 @@ export default class MealPlanner {
         });
       }
     });
-    
+
     return this.consolidateIngredients(allIngredients);
   }
 
   consolidateIngredients(ingredients) {
     const consolidated = {};
-    
-    ingredients.forEach(ingredient => {
+
+    ingredients.forEach((ingredient) => {
       const key = ingredient.name.toLowerCase();
       if (consolidated[key]) {
         // In a real app, you'd need to handle unit conversion and addition
@@ -357,14 +370,14 @@ export default class MealPlanner {
         consolidated[key] = { ...ingredient };
       }
     });
-    
+
     return Object.values(consolidated);
   }
 
   getWeekDisplayText() {
     const start = this.currentWeek[0];
     const end = this.currentWeek[6];
-    
+
     return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
   }
 
@@ -415,7 +428,7 @@ export default class MealPlanner {
   async loadModalRecipes(searchQuery = '') {
     try {
       const resultsContainer = qs('#recipe-results');
-      
+
       let recipes;
       if (searchQuery) {
         recipes = await this.dataSource.searchRecipes(searchQuery);
@@ -428,7 +441,9 @@ export default class MealPlanner {
 
       resultsContainer.innerHTML = `
         <div class="modal-recipe-grid">
-          ${recipes.map(recipe => `
+          ${recipes
+            .map(
+              (recipe) => `
             <div class="modal-recipe-card" data-recipe-id="${recipe.id}">
               <div class="recipe-image-small">
                 <img src="${recipe.image}" alt="${recipe.title}" loading="lazy">
@@ -444,10 +459,11 @@ export default class MealPlanner {
                 </button>
               </div>
             </div>
-          `).join('')}
+          `
+            )
+            .join('')}
         </div>
       `;
-
     } catch (error) {
       console.error('Error loading modal recipes:', error);
       qs('#recipe-results').innerHTML = `
@@ -498,7 +514,7 @@ export default class MealPlanner {
       if (e.target.closest('.select-recipe-btn')) {
         const recipeId = e.target.closest('.select-recipe-btn').getAttribute('data-recipe-id');
         const recipe = await this.dataSource.getRecipeById(recipeId);
-        
+
         if (recipe) {
           this.addMealToPlan(date, mealType, recipe);
           closeModal();
@@ -523,11 +539,13 @@ export default class MealPlanner {
             <div class="form-group">
               <label class="form-label">Select Date:</label>
               <select class="form-input" id="date-select">
-                ${this.currentWeek.map(date => {
-                  const dateKey = this.formatDateKey(date);
-                  const displayDate = this.formatDisplayDate(date);
-                  return `<option value="${dateKey}">${displayDate}</option>`;
-                }).join('')}
+                ${this.currentWeek
+                  .map((date) => {
+                    const dateKey = this.formatDateKey(date);
+                    const displayDate = this.formatDisplayDate(date);
+                    return `<option value="${dateKey}">${displayDate}</option>`;
+                  })
+                  .join('')}
               </select>
             </div>
             <div class="form-group">
@@ -559,7 +577,7 @@ export default class MealPlanner {
       document.body.removeChild(modal);
     };
 
-    [closeBtn, cancelBtn].forEach(btn => {
+    [closeBtn, cancelBtn].forEach((btn) => {
       btn.addEventListener('click', closeModal);
     });
 
@@ -570,7 +588,7 @@ export default class MealPlanner {
     confirmBtn.addEventListener('click', () => {
       const selectedDate = qs('#date-select', modal).value;
       const selectedMealType = qs('#meal-type-select', modal).value;
-      
+
       this.addMealToPlan(selectedDate, selectedMealType, recipe);
       closeModal();
     });
