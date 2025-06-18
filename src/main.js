@@ -336,6 +336,8 @@ class KitoweoApp {
   }
   async loadRecipes(searchQuery = '', initialParams = {}) {
     try {
+      console.log('🔍 loadRecipes called with:', { searchQuery, initialParams });
+
       const loadingSpinner = qs('#loading-spinner');
       const recipesGrid = qs('#recipes-grid');
       const resultsCount = qs('#results-count');
@@ -346,16 +348,22 @@ class KitoweoApp {
 
       // Build search options for API
       const searchOptions = this.buildSearchOptions(initialParams);
+      console.log('🔧 Search options built:', searchOptions);
 
       // Get recipes based on search query
       let recipes;
       if (searchQuery) {
+        console.log('🌐 Calling searchRecipes with query:', searchQuery);
         recipes = await this.dataSource.searchRecipes(searchQuery, searchOptions);
         qs('#results-title').textContent = `Search Results for "${searchQuery}"`;
       } else {
+        console.log('🌐 Calling getAllRecipes');
         recipes = await this.dataSource.getAllRecipes();
         qs('#results-title').textContent = 'All Recipes';
       }
+
+      console.log('📊 Recipes received:', recipes?.length || 0, 'recipes');
+      console.log('📋 First recipe:', recipes?.[0]?.title || 'None');
 
       // Apply any initial category filter
       if (initialParams.category) {
@@ -904,15 +912,14 @@ class KitoweoApp {
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   const app = new KitoweoApp();
-  
+
   // Expose app for testing in browser console
   window.kitoweoApp = app;
-  
   // Add global test function
-  window.testAPI = async function() {
+  window.testAPI = async function () {
     console.log('🧪 Testing Spoonacular API Connection...');
-    console.log('=' .repeat(50));
-    
+    console.log('='.repeat(50));
+
     // Test 1: Check configuration
     console.log('1️⃣ Configuration Check:');
     const apiStatus = app.dataSource.spoonacularAPI.getStatus();
@@ -920,31 +927,148 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('   ✓ API Key (masked):', apiStatus.apiKey);
     console.log('   ✓ Base URL:', apiStatus.baseURL);
     console.log('   ✓ Cache size:', apiStatus.cacheSize, 'entries');
-    
+    console.log('   ✓ Using API:', app.dataSource.useAPI);
+
     if (!apiStatus.configured) {
       console.error('❌ API key not configured. Please check your .env file.');
       return false;
     }
-    
-    // Test 2: Simple API call
-    console.log('\n2️⃣ API Connection Test:');
+
+    // Test 2: Direct API call
+    console.log('\n2️⃣ Direct API Test:');
     try {
-      const recipes = await app.dataSource.searchRecipes('chicken', { number: 3 });
-      console.log('   ✅ API search successful!');
+      const directResult = await app.dataSource.spoonacularAPI.searchRecipes('pasta', {
+        number: 3,
+      });
+      console.log('   ✅ Direct API call successful!');
+      console.log('   ✓ Found', directResult.totalResults, 'total recipes');
+      console.log('   ✓ Returned', directResult.recipes.length, 'recipes');
+      if (directResult.recipes.length > 0) {
+        console.log('   ✓ Sample recipe:', directResult.recipes[0].title);
+        console.log('   ✓ Recipe source:', directResult.recipes[0].source);
+      }
+    } catch (error) {
+      console.error('   ❌ Direct API call failed:', error.message);
+    }
+
+    // Test 3: DataSource search
+    console.log('\n3️⃣ DataSource Search Test:');
+    try {
+      const recipes = await app.dataSource.searchRecipes('pasta', { number: 3 });
+      console.log('   ✅ DataSource search successful!');
       console.log('   ✓ Found', recipes.length, 'recipes');
       if (recipes.length > 0) {
         console.log('   ✓ Sample recipe:', recipes[0].title);
+        console.log('   ✓ Recipe source:', recipes[0].source);
+        console.log('   ✓ Recipe image:', recipes[0].image);
       }
-      
+
       return true;
     } catch (error) {
-      console.error('   ❌ API search failed:', error.message);
+      console.error('   ❌ DataSource search failed:', error.message);
       return false;
     }
   };
-  
+
+  // Add search testing function
+  window.testSearch = async function (query = 'pasta') {
+    console.log(`🔍 Testing search for: "${query}"`);
+    console.log('='.repeat(50));
+
+    try {
+      const recipes = await app.dataSource.searchRecipes(query, { number: 5 });
+      console.log(`✅ Found ${recipes.length} recipes for "${query}"`);
+
+      recipes.forEach((recipe, index) => {
+        console.log(`${index + 1}. ${recipe.title} (${recipe.source})`);
+        console.log(`   - Cooking time: ${recipe.cookingTime} min`);
+        console.log(`   - Category: ${recipe.category}`);
+        console.log(`   - Image: ${recipe.image.substring(0, 50)}...`);
+      });
+
+      return recipes;
+    } catch (error) {
+      console.error(`❌ Search failed for "${query}":`, error.message);
+      return [];
+    }
+  };
+  // Add detailed search debugging function
+  window.debugSearch = async function (query = 'pasta') {
+    console.log(`🔍 DEBUG: Full search flow for "${query}"`);
+    console.log('='.repeat(60));
+
+    // Step 1: Check app state
+    console.log('1️⃣ App State Check:');
+    console.log('   ✓ API configured:', app.dataSource.spoonacularAPI.isConfigured());
+    console.log('   ✓ Using API:', app.dataSource.useAPI);
+    console.log('   ✓ Mock fallback:', app.dataSource.mockDataFallback);
+
+    // Step 2: Test direct API call
+    console.log('\n2️⃣ Direct API Call:');
+    try {
+      const apiResult = await app.dataSource.spoonacularAPI.searchRecipes(query, { number: 5 });
+      console.log('   ✅ API returned:', apiResult.totalResults, 'total recipes');
+      console.log('   ✓ Recipes in batch:', apiResult.recipes.length);
+    } catch (error) {
+      console.error('   ❌ API call failed:', error.message);
+    }
+
+    // Step 3: Test DataSource search
+    console.log('\n3️⃣ DataSource Search:');
+    try {
+      const dsResult = await app.dataSource.searchRecipes(query, { number: 5 });
+      console.log('   ✅ DataSource returned:', dsResult.length, 'recipes');
+      if (dsResult.length > 0) {
+        console.log('   ✓ First recipe:', dsResult[0].title);
+        console.log('   ✓ Recipe has image:', !!dsResult[0].image);
+        console.log('   ✓ Recipe source:', dsResult[0].source);
+      }
+    } catch (error) {
+      console.error('   ❌ DataSource search failed:', error.message);
+    }
+
+    // Step 4: Test UI search (simulate what happens when user searches)
+    console.log('\n4️⃣ UI Search Simulation:');
+    try {
+      // Navigate to recipes page
+      window.location.hash = `#recipes?search=${encodeURIComponent(query)}`;
+      console.log('   ✓ Navigated to recipes page with search query');
+    } catch (error) {
+      console.error('   ❌ Navigation failed:', error.message);
+    }
+  };
+
+  // Add function to check current page state
+  window.checkPageState = function () {
+    console.log('📊 Current Page State:');
+    console.log('='.repeat(40));
+
+    const recipesGrid = qs('#recipes-grid');
+    const resultsCount = qs('#results-count');
+    const searchInput = qs('#recipe-search-input');
+    const loadingSpinner = qs('#loading-spinner');
+
+    console.log('Grid element exists:', !!recipesGrid);
+    console.log('Grid children count:', recipesGrid?.children.length || 0);
+    console.log('Results count text:', resultsCount?.textContent || 'Not found');
+    console.log('Search input value:', searchInput?.value || 'Not found');
+    console.log('Loading spinner visible:', loadingSpinner?.style.display !== 'none');
+    console.log('Current URL hash:', window.location.hash);
+
+    if (recipesGrid) {
+      console.log('Grid display style:', window.getComputedStyle(recipesGrid).display);
+      console.log('Grid innerHTML length:', recipesGrid.innerHTML.length);
+      if (recipesGrid.innerHTML.length < 100) {
+        console.log('Grid content:', recipesGrid.innerHTML);
+      }
+    }
+  };
+
   // Add console helper message
   console.log('🍳 Kitoweo Recipe App loaded!');
   console.log('💡 Type "testAPI()" in console to test Spoonacular API connection');
+  console.log('💡 Type "testSearch("pasta")" to test searching for specific terms');
+  console.log('💡 Type "debugSearch("pasta")" for detailed search debugging');
+  console.log('💡 Type "checkPageState()" to see current page state');
   console.log('💡 Access app instance via "window.kitoweoApp"');
 });

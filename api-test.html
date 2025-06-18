@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spoonacular API Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      .status {
+        padding: 15px;
+        border-radius: 5px;
+        margin: 10px 0;
+      }
+      .success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      .warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+      }
+      .info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+      }
+      button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      button:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+      }
+      #results {
+        margin-top: 20px;
+        white-space: pre-wrap;
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🧪 Spoonacular API Connection Test</h1>
+
+    <div class="info">
+      <strong>Environment Variables:</strong><br />
+      API Key: <span id="api-key-status">Checking...</span><br />
+      Base URL: <span id="base-url">Checking...</span>
+    </div>
+
+    <button onclick="testConfiguration()">1️⃣ Test Configuration</button>
+    <button onclick="testSimpleSearch()" id="search-btn">2️⃣ Test Simple Search</button>
+    <button onclick="testRecipeDetails()" id="details-btn">3️⃣ Test Recipe Details</button>
+    <button onclick="clearResults()">🗑️ Clear Results</button>
+
+    <div id="results"></div>
+
+    <script type="module">
+      // Import the environment variables (Vite specific)
+      const API_KEY = import.meta.env.VITE_SPOONACULAR_API_KEY;
+      const BASE_URL = import.meta.env.VITE_SPOONACULAR_BASE_URL || 'https://api.spoonacular.com';
+
+      // Update status display
+      document.getElementById('api-key-status').textContent = API_KEY
+        ? `${API_KEY.substring(0, 8)}...`
+        : 'Not configured';
+      document.getElementById('base-url').textContent = BASE_URL;
+
+      let results = document.getElementById('results');
+
+      function log(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+        results.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+        results.scrollTop = results.scrollHeight;
+      }
+
+      window.testConfiguration = function () {
+        log('Testing API Configuration...', 'info');
+
+        if (!API_KEY) {
+          log('API key not found in environment variables', 'error');
+          log('Please check your .env file contains: VITE_SPOONACULAR_API_KEY=your_key', 'error');
+          return;
+        }
+
+        log(`API Key configured: ${API_KEY.substring(0, 8)}...`, 'success');
+        log(`Base URL: ${BASE_URL}`, 'success');
+        log('Configuration test complete!', 'success');
+      };
+
+      window.testSimpleSearch = async function () {
+        const btn = document.getElementById('search-btn');
+        btn.disabled = true;
+        btn.textContent = 'Testing...';
+
+        log('Testing simple recipe search...', 'info');
+
+        if (!API_KEY) {
+          log('API key not configured', 'error');
+          btn.disabled = false;
+          btn.textContent = '2️⃣ Test Simple Search';
+          return;
+        }
+
+        try {
+          const url = `${BASE_URL}/complexSearch?apiKey=${API_KEY}&query=chicken&number=3`;
+          log(`Making request to: ${BASE_URL}/complexSearch`, 'info');
+
+          const response = await fetch(url);
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          log(`Search successful! Found ${data.totalResults} total recipes`, 'success');
+          log(`Returned ${data.results.length} recipes in this batch`, 'success');
+
+          if (data.results.length > 0) {
+            log(`Sample recipe: "${data.results[0].title}" (ID: ${data.results[0].id})`, 'success');
+          }
+        } catch (error) {
+          log(`Search failed: ${error.message}`, 'error');
+
+          if (error.message.includes('401')) {
+            log('This usually means your API key is invalid', 'error');
+          } else if (error.message.includes('402')) {
+            log('This means you have exceeded your API quota', 'error');
+          } else if (error.message.includes('403')) {
+            log('This means access is forbidden - check your API key permissions', 'error');
+          }
+        } finally {
+          btn.disabled = false;
+          btn.textContent = '2️⃣ Test Simple Search';
+        }
+      };
+
+      window.testRecipeDetails = async function () {
+        const btn = document.getElementById('details-btn');
+        btn.disabled = true;
+        btn.textContent = 'Testing...';
+
+        log('Testing recipe details fetch...', 'info');
+
+        if (!API_KEY) {
+          log('API key not configured', 'error');
+          btn.disabled = false;
+          btn.textContent = '3️⃣ Test Recipe Details';
+          return;
+        }
+
+        try {
+          const recipeId = 715538; // Known recipe ID for testing
+          const url = `${BASE_URL}/${recipeId}/information?apiKey=${API_KEY}`;
+          log(`Making request for recipe ID: ${recipeId}`, 'info');
+
+          const response = await fetch(url);
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const recipe = await response.json();
+          log(`Recipe details successful!`, 'success');
+          log(`Recipe: "${recipe.title}"`, 'success');
+          log(`Ready in: ${recipe.readyInMinutes} minutes`, 'success');
+          log(`Servings: ${recipe.servings}`, 'success');
+        } catch (error) {
+          log(`Recipe details failed: ${error.message}`, 'error');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = '3️⃣ Test Recipe Details';
+        }
+      };
+
+      window.clearResults = function () {
+        results.textContent = '';
+      };
+
+      // Run configuration test on load
+      setTimeout(testConfiguration, 500);
+    </script>
+  </body>
+</html>

@@ -24,11 +24,16 @@ export default class RecipeDataSource {
 
   /**
    * Search for recipes with filters
-   */
-  async searchRecipes(query = '', options = {}) {
+   */ async searchRecipes(query = '', options = {}) {
+    console.log('🔍 RecipeDataSource.searchRecipes called:', {
+      query,
+      options,
+      useAPI: this.useAPI,
+    });
+
     if (this.useAPI) {
       try {
-        console.log('Searching recipes via Spoonacular API...');
+        console.log('🌐 Searching recipes via Spoonacular API...');
         const result = await this.spoonacularAPI.searchRecipes(query, {
           number: options.number || 12,
           diet: options.diet,
@@ -37,11 +42,16 @@ export default class RecipeDataSource {
           maxReadyTime: options.maxReadyTime,
           sort: options.sort,
         });
+        console.log('✅ API search result:', result);
+        console.log('📊 Recipes found:', result.recipes?.length || 0);
         return result.recipes;
       } catch (error) {
-        console.error('Spoonacular API search failed:', error);
-        if (this.mockDataFallback) {
-          console.log('Falling back to mock data...');
+        console.error('❌ Spoonacular API search failed:', error);
+        console.error('❌ Full error details:', error.stack);
+
+        // Temporarily disable fallback to see the real error
+        if (false && this.mockDataFallback) {
+          console.log('🔄 Falling back to mock data...');
           return this.searchMockRecipes(query, options);
         }
         throw error;
@@ -276,7 +286,7 @@ export default class RecipeDataSource {
           'Add onions and cook until golden',
           'Add rice and stock, simmer for 20 minutes',
         ],
-        image: 'https://via.placeholder.com/400x300/FF6B35/FFFFFF?text=Swahili+Pilau',
+        image: 'https://images.unsplash.com/photo-1642821373181-696a54913e69?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=300&ixid=MnwxfDB8MXxyYW5kb218MHx8c3BpY2VkK3JpY2V8fHx8fHwxNjg3MTk4NjE4&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=400',
         mealType: ['lunch', 'dinner'],
         cuisine: 'swahili',
       },
@@ -303,8 +313,7 @@ export default class RecipeDataSource {
           'Partially cook rice with whole spices',
           'Layer meat and rice alternately',
           'Cook on low heat for 45 minutes',
-        ],
-        image: 'https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=Swahili+Biryani',
+        ],        image: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=300&ixid=MnwxfDB8MXxyYW5kb218MHx8YmlyeWFuaXx8fHx8fDE2ODcxODk2MTg&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=400',
         mealType: ['lunch', 'dinner'],
         cuisine: 'swahili',
       },
@@ -331,10 +340,146 @@ export default class RecipeDataSource {
           'Cook peas until tender',
           'Prepare coconut curry base',
           'Combine and simmer for 15 minutes',
-        ],
-        image: 'https://via.placeholder.com/400x300/2196F3/FFFFFF?text=Mbaazi+wa+Nazi',
+        ],        image: 'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=300&ixid=MnwxfDB8MXxyYW5kb218MHx8Y29jb251dCtjdXJyeXx8fHx8fDE2ODcxODk2MTg&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=400',
         mealType: ['lunch', 'dinner'],
         cuisine: 'swahili',
+      },
+      {
+        id: 4,
+        title: 'Swahili Chicken Curry',
+        description: 'Tender chicken pieces in aromatic coconut curry sauce',
+        cookingTime: 35,
+        servings: 4,
+        calories: 380,
+        difficulty: 'intermediate',
+        tags: ['traditional', 'swahili', 'curry', 'chicken'],
+        dietaryInfo: ['gluten-free'],
+        ingredients: [
+          { name: 'Chicken', amount: '1 kg', category: 'meat' },
+          { name: 'Coconut milk', amount: '400ml', category: 'dairy' },
+          { name: 'Onions', amount: '2 medium', category: 'vegetables' },
+          { name: 'Tomatoes', amount: '3 medium', category: 'vegetables' },
+          { name: 'Curry powder', amount: '2 tbsp', category: 'spices' },
+          { name: 'Ginger', amount: '1 inch piece', category: 'aromatics' },
+        ],
+        instructions: [
+          'Cut chicken into pieces',
+          'Sauté onions until golden',
+          'Add chicken and brown',
+          'Add coconut milk and simmer for 25 minutes',
+        ],
+        image: 'https://images.unsplash.com/photo-1631292784640-2b24be784d5c?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=300&ixid=MnwxfDB8MXxyYW5kb218MHx8Y2hpY2tlbitjdXJyeXx8fHx8fDE2ODcxOTg2MTg&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=400',
+        mealType: ['lunch', 'dinner'],
+        cuisine: 'swahili',
+      },
+      {
+        id: 5,
+        title: 'Kuku wa Nazi',
+        description: 'Traditional Swahili chicken cooked in coconut milk',
+        cookingTime: 40,
+        servings: 6,
+        calories: 420,
+        difficulty: 'beginner',
+        tags: ['traditional', 'swahili', 'coconut', 'chicken'],
+        dietaryInfo: ['gluten-free'],
+        ingredients: [
+          { name: 'Chicken pieces', amount: '1.5 kg', category: 'meat' },
+          { name: 'Coconut milk', amount: '500ml', category: 'dairy' },
+          { name: 'Onions', amount: '1 large', category: 'vegetables' },
+          { name: 'Garlic', amount: '4 cloves', category: 'aromatics' },
+          { name: 'Green chilies', amount: '2 pieces', category: 'spices' },
+          { name: 'Coriander', amount: '1/4 cup', category: 'herbs' },
+        ],
+        instructions: [
+          'Marinate chicken with spices',
+          'Cook onions until soft',
+          'Add chicken and cook until tender',
+          'Pour coconut milk and simmer',
+        ],
+        image: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=300&ixid=MnwxfDB8MXxyYW5kb218MHx8Y29jb251dCtjaGlja2VufHx8fHx8MTY4NzE5ODYxOA&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=400',
+        mealType: ['lunch', 'dinner'],
+        cuisine: 'swahili',
+      },
+      {
+        id: 6,
+        title: 'Chicken Biriyani',
+        description: 'Layered chicken and rice dish with aromatic spices',
+        cookingTime: 75,
+        servings: 8,
+        calories: 520,
+        difficulty: 'advanced',
+        tags: ['traditional', 'chicken', 'rice', 'layered'],
+        dietaryInfo: [],
+        ingredients: [
+          { name: 'Chicken', amount: '1 kg', category: 'meat' },
+          { name: 'Basmati rice', amount: '3 cups', category: 'grains' },
+          { name: 'Yogurt', amount: '1 cup', category: 'dairy' },
+          { name: 'Fried onions', amount: '1 cup', category: 'vegetables' },
+          { name: 'Saffron', amount: '1/2 tsp', category: 'spices' },
+          { name: 'Garam masala', amount: '2 tbsp', category: 'spices' },
+        ],
+        instructions: [
+          'Marinate chicken in yogurt and spices',
+          'Cook rice with whole spices until 70% done',
+          'Layer chicken and rice alternately',
+          'Cook on low heat for 45 minutes',
+        ],        image: 'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=300&ixid=MnwxfDB8MXxyYW5kb218MHx8Y2hpY2tlbitiaXJ5YW5pfHx8fHx8MTY4NzE4OTYxOA&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=400',
+        mealType: ['lunch', 'dinner'],
+        cuisine: 'indian',
+      },
+      {
+        id: 7,
+        title: 'Simple Pasta Marinara',
+        description: 'Classic Italian pasta with fresh tomato sauce',
+        cookingTime: 25,
+        servings: 4,
+        calories: 320,
+        difficulty: 'beginner',
+        tags: ['italian', 'pasta', 'vegetarian', 'quick'],
+        dietaryInfo: ['vegetarian'],
+        ingredients: [
+          { name: 'Pasta', amount: '400g', category: 'grains' },
+          { name: 'Tomatoes', amount: '6 large', category: 'vegetables' },
+          { name: 'Garlic', amount: '4 cloves', category: 'aromatics' },
+          { name: 'Basil', amount: '1/4 cup', category: 'herbs' },
+          { name: 'Olive oil', amount: '3 tbsp', category: 'oils' },
+          { name: 'Parmesan cheese', amount: '1/2 cup', category: 'dairy' },
+        ],
+        instructions: [
+          'Cook pasta according to package directions',
+          'Sauté garlic in olive oil',
+          'Add tomatoes and simmer for 15 minutes',
+          'Toss with pasta and fresh basil',
+        ],        image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=300&ixid=MnwxfDB8MXxyYW5kb218MHx8cGFzdGErbWFyaW5hcmF8fHx8fHwxNjg3MTg5NjE4&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=400',
+        mealType: ['lunch', 'dinner'],
+        cuisine: 'italian',
+      },
+      {
+        id: 8,
+        title: 'Chocolate Chip Cookies',
+        description: 'Soft and chewy homemade chocolate chip cookies',
+        cookingTime: 30,
+        servings: 24,
+        calories: 180,
+        difficulty: 'beginner',
+        tags: ['dessert', 'cookies', 'chocolate', 'baking'],
+        dietaryInfo: ['vegetarian'],
+        ingredients: [
+          { name: 'Flour', amount: '2 cups', category: 'grains' },
+          { name: 'Butter', amount: '1 cup', category: 'dairy' },
+          { name: 'Brown sugar', amount: '3/4 cup', category: 'sweeteners' },
+          { name: 'Eggs', amount: '2 large', category: 'dairy' },
+          { name: 'Chocolate chips', amount: '2 cups', category: 'chocolate' },
+          { name: 'Vanilla extract', amount: '2 tsp', category: 'flavorings' },
+        ],
+        instructions: [
+          'Cream butter and sugars',
+          'Add eggs and vanilla',
+          'Mix in flour gradually',
+          'Fold in chocolate chips and bake for 12 minutes',
+        ],        image: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=300&ixid=MnwxfDB8MXxyYW5kb218MHx8Y2hvY29sYXRlK2NoaXArY29va2llc3x8fHx8fDE2ODcxODk2MTg&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=400',
+        mealType: ['dessert'],
+        cuisine: 'american',
       },
     ];
   }

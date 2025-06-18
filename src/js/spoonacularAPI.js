@@ -89,8 +89,9 @@ export default class SpoonacularAPI {
 
   /**
    * Search for recipes with various filters
-   */
-  async searchRecipes(query = '', options = {}) {
+   */ async searchRecipes(query = '', options = {}) {
+    console.log('🌐 SpoonacularAPI.searchRecipes called:', { query, options });
+
     const params = {
       query: query,
       number: options.number || 12,
@@ -126,16 +127,20 @@ export default class SpoonacularAPI {
     if (options.excludeIngredients) {
       params.excludeIngredients = options.excludeIngredients;
     }
-
     try {
+      console.log('📡 Making API request with params:', params);
       const data = await this.makeRequest('/recipes/complexSearch', params);
+      console.log('📥 Raw API response:', data);
 
-      return {
+      const result = {
         recipes: data.results.map((recipe) => this.normalizeRecipe(recipe)),
         totalResults: data.totalResults,
         offset: data.offset,
         number: data.number,
       };
+
+      console.log('🔄 Normalized result:', result);
+      return result;
     } catch (error) {
       console.error('Error searching recipes:', error);
       throw error;
