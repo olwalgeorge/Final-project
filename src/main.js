@@ -8,13 +8,14 @@ import { qs } from './js/utils.js';
 import RecipeDataSource from './js/recipeData.js';
 import Recipe from './js/recipe.js';
 import Router from './js/router.js';
+import MealPlanner from './js/mealPlanner.js';
 
 // App state
-class KitoweoApp {
-  constructor() {
+class KitoweoApp {  constructor() {
     this.dataSource = new RecipeDataSource();
     this.recipe = new Recipe(this.dataSource);
     this.router = new Router();
+    this.mealPlanner = new MealPlanner(this.dataSource);
 
     this.init();
   }
@@ -43,11 +44,11 @@ class KitoweoApp {
         <!-- Navigation -->
         <nav class="navbar">
           <div class="container navbar-content">
-            <a href="#home" class="logo">Kitoweo</a>
-            <div class="nav-links">
+            <a href="#home" class="logo">Kitoweo</a>            <div class="nav-links">
               <a href="#home" class="nav-link">Home</a>
               <a href="#recipes" class="nav-link">Recipes</a>
               <a href="#meal-planner" class="nav-link">Meal Planner</a>
+              <a href="#shopping-list" class="nav-link">Shopping List</a>
             </div>
             <button class="mobile-menu-btn">☰</button>
           </div>
@@ -95,12 +96,14 @@ class KitoweoApp {
     switch (route) {
       case 'home':
         this.loadHomePage();
-        break;
-      case 'recipes':
+        break;      case 'recipes':
         this.loadRecipesPage(queryParams);
         break;
       case 'meal-planner':
         this.loadMealPlannerPage();
+        break;
+      case 'shopping-list':
+        this.loadShoppingListPage();
         break;
       case 'recipe':
         if (params[0]) {
@@ -450,18 +453,46 @@ class KitoweoApp {
 
     return filteredRecipes;
   }
-
   async loadMealPlannerPage() {
-    const mainContent = qs('#main-content');
-    mainContent.innerHTML = `
-      <section class="coming-soon">
-        <div class="container text-center">
-          <h1>Meal Planner</h1>
-          <p>Coming soon! Plan your weekly meals and generate shopping lists.</p>
-          <a href="#recipes" class="btn btn-primary">Browse Recipes</a>
-        </div>
-      </section>
-    `;
+    try {
+      const mainContent = qs('#main-content');
+      
+      mainContent.innerHTML = `
+        <section class="meal-planner-hero">
+          <div class="container">
+            <div class="hero-content text-center">
+              <h1>Weekly Meal Planner</h1>
+              <p class="text-secondary">Plan your meals for the week, organize your cooking schedule, and generate shopping lists automatically</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="meal-planner-section">
+          <div class="container">
+            <div class="meal-planner-container">
+              <!-- Meal planner will be rendered here -->
+            </div>
+          </div>
+        </section>
+      `;
+
+      // Initialize and render the meal planner
+      await this.mealPlanner.renderMealPlanner('.meal-planner-container');
+      
+    } catch (error) {
+      console.error('Error loading meal planner page:', error);
+      
+      const mainContent = qs('#main-content');
+      mainContent.innerHTML = `
+        <section class="error-section">
+          <div class="container text-center">
+            <h1>Oops! Something went wrong</h1>
+            <p>We couldn't load the meal planner. Please try again.</p>
+            <button class="btn btn-primary" onclick="location.reload()">Retry</button>
+          </div>
+        </section>
+      `;
+    }
   }
 
   async loadRecipeDetail(recipeId) {
@@ -616,6 +647,106 @@ class KitoweoApp {
       });
     });
   }
+
+  async loadShoppingListPage() {
+    try {
+      const mainContent = qs('#main-content');
+      
+      // Get ingredients from meal planner
+      const ingredients = this.mealPlanner.extractIngredientsFromWeek();
+      
+      mainContent.innerHTML = `
+        <section class="shopping-list-hero">
+          <div class="container">
+            <div class="hero-content text-center">
+              <h1>Shopping List</h1>
+              <p class="text-secondary">Your automatically generated shopping list based on this week's meal plan</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="shopping-list-section">
+          <div class="container">
+            <div class="shopping-list-container">
+              <div class="shopping-list-header">
+                <h2>Week of ${this.mealPlanner.getWeekDisplayText()}</h2>
+                <div class="shopping-actions">
+                  <button class="btn btn-secondary" onclick="window.print()">Print List</button>
+                  <a href="#meal-planner" class="btn btn-primary">Back to Meal Planner</a>
+                </div>
+              </div>
+              
+              ${ingredients.length > 0 ? `
+                <div class="shopping-list">
+                  <div class="ingredient-categories">
+                    ${this.renderIngredientCategories(ingredients)}
+                  </div>
+                </div>
+              ` : `
+                <div class="empty-shopping-list">
+                  <div class="empty-state">
+                    <h3>No items in your shopping list</h3>
+                    <p>Add some meals to your meal plan to generate a shopping list.</p>
+                    <a href="#meal-planner" class="btn btn-primary">Plan Meals</a>
+                  </div>
+                </div>
+              `}
+            </div>
+          </div>
+        </section>
+      `;
+      
+    } catch (error) {
+      console.error('Error loading shopping list page:', error);
+    }
+  }
+
+  renderIngredientCategories(ingredients) {
+    // Group ingredients by category (mock categories for now)
+    const categories = {
+      'Produce': [],
+      'Meat & Seafood': [],
+      'Dairy & Eggs': [],
+      'Pantry': [],
+      'Other': []
+    };
+
+    ingredients.forEach(ingredient => {
+      // Simple categorization logic (in a real app, this would be more sophisticated)
+      const name = ingredient.name.toLowerCase();
+      if (name.includes('chicken') || name.includes('beef') || name.includes('fish') || name.includes('meat')) {
+        categories['Meat & Seafood'].push(ingredient);
+      } else if (name.includes('milk') || name.includes('cheese') || name.includes('egg') || name.includes('butter')) {
+        categories['Dairy & Eggs'].push(ingredient);
+      } else if (name.includes('tomato') || name.includes('onion') || name.includes('lettuce') || name.includes('apple')) {
+        categories['Produce'].push(ingredient);
+      } else if (name.includes('flour') || name.includes('oil') || name.includes('salt') || name.includes('pepper')) {
+        categories['Pantry'].push(ingredient);
+      } else {
+        categories['Other'].push(ingredient);
+      }
+    });
+
+    return Object.entries(categories)
+      .filter(([category, items]) => items.length > 0)
+      .map(([category, items]) => `
+        <div class="ingredient-category">
+          <h3 class="category-title">${category}</h3>
+          <div class="ingredient-list">
+            ${items.map(ingredient => `
+              <div class="ingredient-item">
+                <label class="ingredient-label">
+                  <input type="checkbox" class="ingredient-checkbox">
+                  <span class="ingredient-text">${ingredient.amount} ${ingredient.name}</span>
+                </label>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+  }
+
+  // ...existing code...
 }
 
 // Initialize the app when DOM is loaded

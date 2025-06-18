@@ -231,7 +231,6 @@ export default class MealPlanner {
       }
     });
   }
-
   navigateWeek(direction) {
     const daysToAdd = direction * 7;
     this.currentWeek = this.currentWeek.map(date => {
@@ -243,7 +242,7 @@ export default class MealPlanner {
     // Load meal plan for new week
     this.mealPlan = { ...this.mealPlan, ...this.createEmptyMealPlan() };
     
-    // Re-render
+    // Re-render the meal planner
     this.renderMealPlanner('.meal-planner-container');
   }
 
@@ -258,32 +257,17 @@ export default class MealPlanner {
           snacks: []
         };
       });
-      
-      this.saveMealPlan();
+        this.saveMealPlan();
       this.renderMealPlanner('.meal-planner-container');
       alertMessage('Week cleared successfully!');
     }
   }
-
   async handleAddMeal(mealSlot) {
     const date = mealSlot.getAttribute('data-date');
     const mealType = mealSlot.getAttribute('data-meal-type');
     
-    // For now, show a simple prompt - in a full app, this would be a modal with recipe search
-    const recipeName = prompt(`Add a ${mealType} for ${date}:`);
-    
-    if (recipeName) {
-      // Mock recipe data - in real app, this would search/select from actual recipes
-      const mockRecipe = {
-        id: Date.now(),
-        title: recipeName,
-        cookingTime: 30,
-        servings: 4,
-        calories: 350
-      };
-      
-      this.addMealToPlan(date, mealType, mockRecipe);
-    }
+    // Show recipe selection modal
+    await this.showRecipeSelectionModal(date, mealType);
   }
 
   handleRemoveMeal(mealSlot) {
@@ -302,8 +286,7 @@ export default class MealPlanner {
     
     this.mealPlan[date][mealType] = recipe;
     this.saveMealPlan();
-    
-    // Re-render the specific meal slot
+      // Re-render the specific meal slot
     this.renderMealPlanner('.meal-planner-container');
     alertMessage(`${recipe.title} added to ${mealType}!`);
   }
@@ -312,22 +295,14 @@ export default class MealPlanner {
     if (this.mealPlan[date]) {
       this.mealPlan[date][mealType] = null;
       this.saveMealPlan();
-      
-      // Re-render
+        // Re-render the meal planner
       this.renderMealPlanner('.meal-planner-container');
       alertMessage('Meal removed from plan');
     }
   }
-
   showMealPlanModal(recipeId) {
-    // For now, just add to today's lunch - in a full app, this would be a modal
-    const today = this.formatDateKey(new Date());
-    
-    this.dataSource.getRecipeById(recipeId).then(recipe => {
-      if (recipe) {
-        this.addMealToPlan(today, 'lunch', recipe);
-      }
-    });
+    // Show date and meal type selection modal
+    this.showDateMealTypeModal(recipeId);
   }
 
   viewRecipe(recipeId) {
@@ -395,5 +370,209 @@ export default class MealPlanner {
 
   capitalizeFirst(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  async showRecipeSelectionModal(date, mealType) {
+    // Create modal overlay
+    const modal = createElement('div', 'recipe-selection-modal');
+    modal.innerHTML = `
+      <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Select Recipe for ${this.capitalizeFirst(mealType)}</h3>
+            <button class="modal-close" id="modal-close">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="recipe-search-container">
+              <input 
+                type="text" 
+                id="recipe-search-input" 
+                class="search-input" 
+                placeholder="Search for recipes..."
+                autocomplete="off"
+              >
+            </div>
+            <div class="recipe-results" id="recipe-results">
+              <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Loading recipes...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Load initial recipes
+    await this.loadModalRecipes();
+
+    // Attach modal events
+    this.attachModalEvents(modal, date, mealType);
+  }
+
+  async loadModalRecipes(searchQuery = '') {
+    try {
+      const resultsContainer = qs('#recipe-results');
+      
+      let recipes;
+      if (searchQuery) {
+        recipes = await this.dataSource.searchRecipes(searchQuery);
+      } else {
+        recipes = await this.dataSource.getAllRecipes();
+      }
+
+      // Limit to 12 recipes for the modal
+      recipes = recipes.slice(0, 12);
+
+      resultsContainer.innerHTML = `
+        <div class="modal-recipe-grid">
+          ${recipes.map(recipe => `
+            <div class="modal-recipe-card" data-recipe-id="${recipe.id}">
+              <div class="recipe-image-small">
+                <img src="${recipe.image}" alt="${recipe.title}" loading="lazy">
+              </div>
+              <div class="recipe-info-small">
+                <h5>${recipe.title}</h5>
+                <div class="recipe-meta-small">
+                  <span>⏱ ${recipe.cookingTime}m</span>
+                  <span>🔥 ${recipe.calories} cal</span>
+                </div>
+                <button class="btn btn-sm btn-primary select-recipe-btn" data-recipe-id="${recipe.id}">
+                  Select
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+    } catch (error) {
+      console.error('Error loading modal recipes:', error);
+      qs('#recipe-results').innerHTML = `
+        <div class="error-state">
+          <p>Error loading recipes. Please try again.</p>
+        </div>
+      `;
+    }
+  }
+
+  attachModalEvents(modal, date, mealType) {
+    const overlay = qs('#modal-overlay', modal);
+    const closeBtn = qs('#modal-close', modal);
+    const searchInput = qs('#recipe-search-input', modal);
+
+    // Close modal events
+    const closeModal = () => {
+      document.body.removeChild(modal);
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        closeModal();
+      }
+    });
+
+    // Escape key to close
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        document.removeEventListener('keydown', handleEscape);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+
+    // Search functionality
+    let searchTimeout;
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        this.loadModalRecipes(e.target.value.trim());
+      }, 300);
+    });
+
+    // Recipe selection
+    modal.addEventListener('click', async (e) => {
+      if (e.target.closest('.select-recipe-btn')) {
+        const recipeId = e.target.closest('.select-recipe-btn').getAttribute('data-recipe-id');
+        const recipe = await this.dataSource.getRecipeById(recipeId);
+        
+        if (recipe) {
+          this.addMealToPlan(date, mealType, recipe);
+          closeModal();
+        }
+      }
+    });
+  }
+
+  async showDateMealTypeModal(recipeId) {
+    const recipe = await this.dataSource.getRecipeById(recipeId);
+    if (!recipe) return;
+
+    const modal = createElement('div', 'date-meal-modal');
+    modal.innerHTML = `
+      <div class="modal-overlay" id="date-modal-overlay">
+        <div class="modal-content modal-content-small">
+          <div class="modal-header">
+            <h3>Add "${recipe.title}" to Meal Plan</h3>
+            <button class="modal-close" id="date-modal-close">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Select Date:</label>
+              <select class="form-input" id="date-select">
+                ${this.currentWeek.map(date => {
+                  const dateKey = this.formatDateKey(date);
+                  const displayDate = this.formatDisplayDate(date);
+                  return `<option value="${dateKey}">${displayDate}</option>`;
+                }).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Select Meal:</label>
+              <select class="form-input" id="meal-type-select">
+                <option value="breakfast">Breakfast</option>
+                <option value="lunch">Lunch</option>
+                <option value="dinner">Dinner</option>
+              </select>
+            </div>
+            <div class="modal-actions">
+              <button class="btn btn-secondary" id="cancel-add">Cancel</button>
+              <button class="btn btn-primary" id="confirm-add">Add to Plan</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Attach events
+    const overlay = qs('#date-modal-overlay', modal);
+    const closeBtn = qs('#date-modal-close', modal);
+    const cancelBtn = qs('#cancel-add', modal);
+    const confirmBtn = qs('#confirm-add', modal);
+
+    const closeModal = () => {
+      document.body.removeChild(modal);
+    };
+
+    [closeBtn, cancelBtn].forEach(btn => {
+      btn.addEventListener('click', closeModal);
+    });
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeModal();
+    });
+
+    confirmBtn.addEventListener('click', () => {
+      const selectedDate = qs('#date-select', modal).value;
+      const selectedMealType = qs('#meal-type-select', modal).value;
+      
+      this.addMealToPlan(selectedDate, selectedMealType, recipe);
+      closeModal();
+    });
   }
 }
