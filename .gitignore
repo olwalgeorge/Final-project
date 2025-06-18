@@ -25,3 +25,6 @@ dist-ssr
 
 # GitHub 
 .github/
+
+# Development and planning files
+DEVELOPMENT_PLAN.md
