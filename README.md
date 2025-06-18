@@ -5,6 +5,7 @@ A modern recipe finder and meal planning web application built with Vanilla Java
 ## 🚀 Quick Start
 
 ### 1. Install Dependencies
+
 ```bash
 npm install
 ```
@@ -12,11 +13,13 @@ npm install
 ### 2. Configure API Key (Required for Live Recipe Data)
 
 1. **Get your FREE Spoonacular API key:**
+
    - Visit [Spoonacular API Console](https://spoonacular.com/food-api/console#Dashboard)
    - Create a free account
    - Copy your API key
 
 2. **Create environment file:**
+
    ```bash
    # Copy the example file
    cp .env.example .env
@@ -28,16 +31,17 @@ npm install
    ```
 
 ### 3. Start Development Server
+
 ```bash
 npm run dev
 ```
 
 ## 🔧 Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `VITE_SPOONACULAR_API_KEY` | Your Spoonacular API key | Yes (for live data) |
-| `VITE_SPOONACULAR_BASE_URL` | API base URL | No (has default) |
+| Variable                    | Description              | Required            |
+| --------------------------- | ------------------------ | ------------------- |
+| `VITE_SPOONACULAR_API_KEY`  | Your Spoonacular API key | Yes (for live data) |
+| `VITE_SPOONACULAR_BASE_URL` | API base URL             | No (has default)    |
 
 ## 📊 Data Sources
 

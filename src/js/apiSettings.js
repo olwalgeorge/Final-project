@@ -12,10 +12,10 @@ export default class APISettings {
 
   async renderAPISettings(container) {
     const settingsContainer = typeof container === 'string' ? qs(container) : container;
-    
+
     // Get current API status
     const apiStatus = await this.dataSource.getAPIStatus();
-    
+
     settingsContainer.innerHTML = `
       <div class="api-settings">
         <div class="settings-header">
@@ -48,7 +48,9 @@ export default class APISettings {
                 </div>
               </div>
 
-              ${!apiStatus.configured ? `
+              ${
+                !apiStatus.configured
+                  ? `
                 <div class="setup-instructions">
                   <h4>🚀 Quick Setup Guide:</h4>
                   <ol class="setup-steps">
@@ -74,10 +76,14 @@ export default class APISettings {
                     </li>
                   </ol>
                 </div>
-              ` : ''}
+              `
+                  : ''
+              }
             </div>
             
-            ${apiStatus.usage ? `
+            ${
+              apiStatus.usage
+                ? `
               <div class="api-usage">
                 <h4>📊 API Usage</h4>
                 <div class="usage-stats">
@@ -91,13 +97,19 @@ export default class APISettings {
                   </div>
                 </div>
               </div>
-            ` : ''}
+            `
+                : ''
+            }
 
-            ${apiStatus.error ? `
+            ${
+              apiStatus.error
+                ? `
               <div class="error-message">
                 <strong>Error:</strong> ${apiStatus.error}
               </div>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
 
           <div class="settings-controls">
@@ -180,9 +192,9 @@ export default class APISettings {
     useApiToggle.addEventListener('change', (e) => {
       this.dataSource.setUseAPI(e.target.checked);
       this.showMessage(
-        e.target.checked ? 
-        'Spoonacular API enabled' : 
-        'Spoonacular API disabled - using mock data only'
+        e.target.checked
+          ? 'Spoonacular API enabled'
+          : 'Spoonacular API disabled - using mock data only'
       );
     });
 
@@ -190,9 +202,7 @@ export default class APISettings {
     fallbackToggle.addEventListener('change', (e) => {
       this.dataSource.mockDataFallback = e.target.checked;
       this.showMessage(
-        e.target.checked ? 
-        'Mock data fallback enabled' : 
-        'Mock data fallback disabled'
+        e.target.checked ? 'Mock data fallback enabled' : 'Mock data fallback disabled'
       );
     });
 
@@ -206,7 +216,7 @@ export default class APISettings {
     testApiBtn.addEventListener('click', async () => {
       const button = testApiBtn;
       const originalText = button.textContent;
-      
+
       button.textContent = 'Testing...';
       button.disabled = true;
 

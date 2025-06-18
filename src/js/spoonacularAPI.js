@@ -9,7 +9,7 @@ export default class SpoonacularAPI {
     this.apiKey = import.meta.env.VITE_SPOONACULAR_API_KEY;
     this.requestCache = new Map();
     this.cacheTTL = 5 * 60 * 1000; // 5 minutes cache
-    
+
     if (!this.apiKey) {
       console.warn('🔑 Spoonacular API key not found!');
       console.warn('📁 Please create a .env file with: VITE_SPOONACULAR_API_KEY=your_api_key_here');
@@ -32,13 +32,13 @@ export default class SpoonacularAPI {
       configured: this.isConfigured(),
       apiKey: this.apiKey ? `${this.apiKey.substring(0, 8)}...` : 'Not set',
       baseURL: this.baseURL,
-      cacheSize: this.requestCache.size
+      cacheSize: this.requestCache.size,
     };
   }
 
   /**
    * Generic API request method with caching and error handling
-   */  async makeRequest(endpoint, params = {}) {
+   */ async makeRequest(endpoint, params = {}) {
     // Check if API is configured
     if (!this.isConfigured()) {
       throw new Error('Spoonacular API key not configured. Please check your .env file.');
@@ -47,11 +47,11 @@ export default class SpoonacularAPI {
     // Add API key to all requests
     const urlParams = new URLSearchParams({
       apiKey: this.apiKey,
-      ...params
+      ...params,
     });
 
     const url = `${this.baseURL}${endpoint}?${urlParams}`;
-    
+
     // Check cache first
     const cached = this.getFromCache(url);
     if (cached) {
@@ -60,9 +60,9 @@ export default class SpoonacularAPI {
 
     try {
       console.log(`🌐 Making Spoonacular API request: ${endpoint}`);
-      
+
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         if (response.status === 402) {
           throw new Error('🚫 API quota exceeded. Please try again later or upgrade your plan.');
@@ -76,10 +76,10 @@ export default class SpoonacularAPI {
       }
 
       const data = await response.json();
-      
+
       // Cache the response
       this.setCache(url, data);
-      
+
       return data;
     } catch (error) {
       console.error('Spoonacular API Error:', error);
@@ -99,7 +99,7 @@ export default class SpoonacularAPI {
       addRecipeNutrition: false,
       fillIngredients: false,
       instructionsRequired: true,
-      sort: options.sort || 'popularity'
+      sort: options.sort || 'popularity',
     };
 
     // Add diet filters
@@ -129,12 +129,12 @@ export default class SpoonacularAPI {
 
     try {
       const data = await this.makeRequest('/recipes/complexSearch', params);
-      
+
       return {
-        recipes: data.results.map(recipe => this.normalizeRecipe(recipe)),
+        recipes: data.results.map((recipe) => this.normalizeRecipe(recipe)),
         totalResults: data.totalResults,
         offset: data.offset,
-        number: data.number
+        number: data.number,
       };
     } catch (error) {
       console.error('Error searching recipes:', error);
@@ -148,7 +148,7 @@ export default class SpoonacularAPI {
   async getRecipeDetails(recipeId) {
     try {
       const params = {
-        includeNutrition: true
+        includeNutrition: true,
       };
 
       const recipe = await this.makeRequest(`/recipes/${recipeId}/information`, params);
@@ -166,11 +166,11 @@ export default class SpoonacularAPI {
     try {
       const params = {
         number: count,
-        'include-tags': tags
+        'include-tags': tags,
       };
 
       const data = await this.makeRequest('/recipes/random', params);
-      return data.recipes.map(recipe => this.normalizeDetailedRecipe(recipe));
+      return data.recipes.map((recipe) => this.normalizeDetailedRecipe(recipe));
     } catch (error) {
       console.error('Error fetching random recipes:', error);
       throw error;
@@ -184,11 +184,11 @@ export default class SpoonacularAPI {
     try {
       const params = {
         ids: ids.join(','),
-        includeNutrition: false
+        includeNutrition: false,
       };
 
       const data = await this.makeRequest('/recipes/informationBulk', params);
-      return data.map(recipe => this.normalizeDetailedRecipe(recipe));
+      return data.map((recipe) => this.normalizeDetailedRecipe(recipe));
     } catch (error) {
       console.error('Error fetching recipes by IDs:', error);
       throw error;
@@ -204,17 +204,17 @@ export default class SpoonacularAPI {
         ingredients: ingredients.join(','),
         number: number,
         ranking: 1, // Maximize used ingredients
-        ignorePantry: true
+        ignorePantry: true,
       };
 
       const data = await this.makeRequest('/recipes/findByIngredients', params);
-      
+
       // Get full recipe information for each result
-      const recipeIds = data.map(recipe => recipe.id);
+      const recipeIds = data.map((recipe) => recipe.id);
       if (recipeIds.length > 0) {
         return await this.getRecipesByIds(recipeIds);
       }
-      
+
       return [];
     } catch (error) {
       console.error('Error searching by ingredients:', error);
@@ -242,24 +242,29 @@ export default class SpoonacularAPI {
     return {
       id: spoonacularRecipe.id,
       title: spoonacularRecipe.title,
-      description: spoonacularRecipe.summary ? 
-        this.stripHtml(spoonacularRecipe.summary).substring(0, 150) + '...' : 
-        'Delicious recipe from Spoonacular',
+      description: spoonacularRecipe.summary
+        ? this.stripHtml(spoonacularRecipe.summary).substring(0, 150) + '...'
+        : 'Delicious recipe from Spoonacular',
       cookingTime: spoonacularRecipe.readyInMinutes || 30,
       servings: spoonacularRecipe.servings || 4,
-      calories: spoonacularRecipe.nutrition?.nutrients?.find(n => n.name === 'Calories')?.amount || 0,
+      calories:
+        spoonacularRecipe.nutrition?.nutrients?.find((n) => n.name === 'Calories')?.amount || 0,
       difficulty: this.getDifficultyFromTime(spoonacularRecipe.readyInMinutes),
       tags: spoonacularRecipe.dishTypes || [],
       dietaryInfo: this.extractDietaryInfo(spoonacularRecipe),
       ingredients: [], // Will be populated when fetching detailed recipe
       instructions: [], // Will be populated when fetching detailed recipe
-      image: spoonacularRecipe.image || `https://via.placeholder.com/400x300/FF6B35/FFFFFF?text=${encodeURIComponent(spoonacularRecipe.title)}`,
+      image:
+        spoonacularRecipe.image ||
+        `https://via.placeholder.com/400x300/FF6B35/FFFFFF?text=${encodeURIComponent(spoonacularRecipe.title)}`,
       category: this.categorizeRecipe(spoonacularRecipe.dishTypes),
       cuisine: spoonacularRecipe.cuisines?.[0] || 'international',
-      rating: spoonacularRecipe.spoonacularScore ? Math.round(spoonacularRecipe.spoonacularScore / 20) : 4,
+      rating: spoonacularRecipe.spoonacularScore
+        ? Math.round(spoonacularRecipe.spoonacularScore / 20)
+        : 4,
       source: 'spoonacular',
       sourceUrl: spoonacularRecipe.sourceUrl,
-      creditsText: spoonacularRecipe.creditsText
+      creditsText: spoonacularRecipe.creditsText,
     };
   }
 
@@ -268,14 +273,16 @@ export default class SpoonacularAPI {
    */
   normalizeDetailedRecipe(spoonacularRecipe) {
     const baseRecipe = this.normalizeRecipe(spoonacularRecipe);
-    
+
     return {
       ...baseRecipe,
       ingredients: this.normalizeIngredients(spoonacularRecipe.extendedIngredients || []),
       instructions: this.normalizeInstructions(spoonacularRecipe.analyzedInstructions || []),
-      nutrition: spoonacularRecipe.nutrition ? this.normalizeNutrition(spoonacularRecipe.nutrition) : null,
+      nutrition: spoonacularRecipe.nutrition
+        ? this.normalizeNutrition(spoonacularRecipe.nutrition)
+        : null,
       winePairing: spoonacularRecipe.winePairing,
-      tips: spoonacularRecipe.tips || []
+      tips: spoonacularRecipe.tips || [],
     };
   }
 
@@ -283,13 +290,15 @@ export default class SpoonacularAPI {
    * Normalize ingredients to our app format
    */
   normalizeIngredients(spoonacularIngredients) {
-    return spoonacularIngredients.map(ingredient => ({
+    return spoonacularIngredients.map((ingredient) => ({
       name: ingredient.name || ingredient.original,
-      amount: ingredient.measures?.metric?.amount ? 
-        `${ingredient.measures.metric.amount} ${ingredient.measures.metric.unitLong}` :
-        ingredient.original,
+      amount: ingredient.measures?.metric?.amount
+        ? `${ingredient.measures.metric.amount} ${ingredient.measures.metric.unitLong}`
+        : ingredient.original,
       category: ingredient.aisle || 'other',
-      image: ingredient.image ? `https://spoonacular.com/cdn/ingredients_100x100/${ingredient.image}` : null
+      image: ingredient.image
+        ? `https://spoonacular.com/cdn/ingredients_100x100/${ingredient.image}`
+        : null,
     }));
   }
 
@@ -298,9 +307,9 @@ export default class SpoonacularAPI {
    */
   normalizeInstructions(spoonacularInstructions) {
     if (!spoonacularInstructions.length) return [];
-    
+
     const instructions = spoonacularInstructions[0]?.steps || [];
-    return instructions.map(step => step.step);
+    return instructions.map((step) => step.step);
   }
 
   /**
@@ -313,7 +322,7 @@ export default class SpoonacularAPI {
       acc[nutrient.name.toLowerCase()] = {
         amount: nutrient.amount,
         unit: nutrient.unit,
-        percentOfDailyNeeds: nutrient.percentOfDailyNeeds
+        percentOfDailyNeeds: nutrient.percentOfDailyNeeds,
       };
       return acc;
     }, {});
@@ -325,7 +334,7 @@ export default class SpoonacularAPI {
       fat: nutrients.fat?.amount || 0,
       fiber: nutrients.fiber?.amount || 0,
       sugar: nutrients.sugar?.amount || 0,
-      nutrients: nutrients
+      nutrients: nutrients,
     };
   }
 
@@ -334,7 +343,7 @@ export default class SpoonacularAPI {
    */
   extractDietaryInfo(recipe) {
     const dietInfo = [];
-    
+
     if (recipe.vegetarian) dietInfo.push('vegetarian');
     if (recipe.vegan) dietInfo.push('vegan');
     if (recipe.glutenFree) dietInfo.push('gluten-free');
@@ -345,7 +354,7 @@ export default class SpoonacularAPI {
     if (recipe.sustainable) dietInfo.push('sustainable');
     if (recipe.ketogenic) dietInfo.push('keto');
     if (recipe.whole30) dietInfo.push('whole30');
-    
+
     return dietInfo;
   }
 
@@ -358,12 +367,13 @@ export default class SpoonacularAPI {
       lunch: ['lunch', 'salad', 'soup', 'sandwich'],
       dinner: ['dinner', 'main course', 'main dish'],
       dessert: ['dessert', 'sweet', 'cake', 'cookie', 'ice cream'],
-      snack: ['snack', 'appetizer', 'side dish', 'fingerfood']
+      snack: ['snack', 'appetizer', 'side dish', 'fingerfood'],
     };
 
     for (const [category, keywords] of Object.entries(categories)) {
-      if (dishTypes.some(type => keywords.some(keyword => 
-        type.toLowerCase().includes(keyword)))) {
+      if (
+        dishTypes.some((type) => keywords.some((keyword) => type.toLowerCase().includes(keyword)))
+      ) {
         return category;
       }
     }
@@ -405,7 +415,7 @@ export default class SpoonacularAPI {
   setCache(key, data) {
     this.requestCache.set(key, {
       data: data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     // Clean old cache entries

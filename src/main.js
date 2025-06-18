@@ -12,7 +12,8 @@ import MealPlanner from './js/mealPlanner.js';
 import APISettings from './js/apiSettings.js';
 
 // App state
-class KitoweoApp {  constructor() {
+class KitoweoApp {
+  constructor() {
     this.dataSource = new RecipeDataSource();
     this.recipe = new Recipe(this.dataSource);
     this.router = new Router();
@@ -105,7 +106,8 @@ class KitoweoApp {  constructor() {
         break;
       case 'meal-planner':
         this.loadMealPlannerPage();
-        break;      case 'shopping-list':
+        break;
+      case 'shopping-list':
         this.loadShoppingListPage();
         break;
       case 'settings':
@@ -423,9 +425,12 @@ class KitoweoApp {  constructor() {
         const filter = btn.getAttribute('data-filter');
         // Map our filter names to Spoonacular diet names
         switch (filter) {
-          case 'gluten-free': return 'glutenFree';
-          case 'keto': return 'ketogenic';
-          default: return filter;
+          case 'gluten-free':
+            return 'glutenFree';
+          case 'keto':
+            return 'ketogenic';
+          default:
+            return filter;
         }
       });
       options.diet = dietTypes.join(',');
@@ -858,7 +863,7 @@ class KitoweoApp {  constructor() {
   async loadSettingsPage() {
     try {
       const mainContent = qs('#main-content');
-      
+
       mainContent.innerHTML = `
         <section class="settings-hero">
           <div class="container">
@@ -879,10 +884,9 @@ class KitoweoApp {  constructor() {
 
       // Initialize and render the API settings
       await this.apiSettings.renderAPISettings('.settings-container');
-      
     } catch (error) {
       console.error('Error loading settings page:', error);
-      
+
       const mainContent = qs('#main-content');
       mainContent.innerHTML = `
         <section class="error-section">
@@ -899,5 +903,48 @@ class KitoweoApp {  constructor() {
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  new KitoweoApp();
+  const app = new KitoweoApp();
+  
+  // Expose app for testing in browser console
+  window.kitoweoApp = app;
+  
+  // Add global test function
+  window.testAPI = async function() {
+    console.log('🧪 Testing Spoonacular API Connection...');
+    console.log('=' .repeat(50));
+    
+    // Test 1: Check configuration
+    console.log('1️⃣ Configuration Check:');
+    const apiStatus = app.dataSource.spoonacularAPI.getStatus();
+    console.log('   ✓ API Key configured:', apiStatus.configured);
+    console.log('   ✓ API Key (masked):', apiStatus.apiKey);
+    console.log('   ✓ Base URL:', apiStatus.baseURL);
+    console.log('   ✓ Cache size:', apiStatus.cacheSize, 'entries');
+    
+    if (!apiStatus.configured) {
+      console.error('❌ API key not configured. Please check your .env file.');
+      return false;
+    }
+    
+    // Test 2: Simple API call
+    console.log('\n2️⃣ API Connection Test:');
+    try {
+      const recipes = await app.dataSource.searchRecipes('chicken', { number: 3 });
+      console.log('   ✅ API search successful!');
+      console.log('   ✓ Found', recipes.length, 'recipes');
+      if (recipes.length > 0) {
+        console.log('   ✓ Sample recipe:', recipes[0].title);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('   ❌ API search failed:', error.message);
+      return false;
+    }
+  };
+  
+  // Add console helper message
+  console.log('🍳 Kitoweo Recipe App loaded!');
+  console.log('💡 Type "testAPI()" in console to test Spoonacular API connection');
+  console.log('💡 Access app instance via "window.kitoweoApp"');
 });

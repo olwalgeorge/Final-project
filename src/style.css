@@ -2791,7 +2791,7 @@ a:hover {
   margin-bottom: var(--spacing-sm);
 }
 
-.setting-label input[type="checkbox"] {
+.setting-label input[type='checkbox'] {
   width: 18px;
   height: 18px;
   border: 2px solid var(--border-color);
@@ -2799,7 +2799,7 @@ a:hover {
   cursor: pointer;
 }
 
-.setting-label input[type="checkbox"]:checked {
+.setting-label input[type='checkbox']:checked {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
 }
