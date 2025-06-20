@@ -1,0 +1,180 @@
+/**
+ * Recipes Page Specific Styles
+ * Styles for the recipes listing and search page
+ */
+
+/* ================================
+   Recipes Page Layout
+   ================================ */
+.recipes-page .hero {
+  background: linear-gradient(135deg, var(--secondary-color) 0%, #45a049 100%);
+  padding: var(--spacing-2xl) 0;
+}
+
+/* ================================
+   Search Section
+   ================================ */
+.search-section {
+  padding: var(--spacing-xl) 0;
+  background-color: var(--background-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* ================================
+   Filters Section Enhanced
+   ================================ */
+.filters-section {
+  position: sticky;
+  top: 60px;
+  z-index: var(--z-sticky);
+  background-color: var(--background-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ================================
+   Results Grid
+   ================================ */
+.results-section {
+  min-height: 400px;
+}
+
+#recipes-grid {
+  min-height: 300px;
+}
+
+/* ================================
+   Filter States
+   ================================ */
+.filter-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.filter-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.filter-btn:hover::before {
+  left: 100%;
+}
+
+/* ================================
+   Recipe Grid Animations
+   ================================ */
+.recipes-grid .recipe-card {
+  animation: fadeInUp 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.recipes-grid .recipe-card:nth-child(1) { animation-delay: 0.1s; }
+.recipes-grid .recipe-card:nth-child(2) { animation-delay: 0.2s; }
+.recipes-grid .recipe-card:nth-child(3) { animation-delay: 0.3s; }
+.recipes-grid .recipe-card:nth-child(4) { animation-delay: 0.4s; }
+.recipes-grid .recipe-card:nth-child(5) { animation-delay: 0.5s; }
+.recipes-grid .recipe-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* Reset animation delay for subsequent cards */
+.recipes-grid .recipe-card:nth-child(n+7) {
+  animation-delay: 0s;
+}
+
+/* ================================
+   Empty State
+   ================================ */
+.empty-recipes {
+  padding: var(--spacing-2xl);
+  text-align: center;
+}
+
+.empty-recipes .empty-icon {
+  font-size: 4rem;
+  opacity: 0.5;
+  margin-bottom: var(--spacing-lg);
+}
+
+/* ================================
+   Loading States
+   ================================ */
+.recipes-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+/* ================================
+   Mobile Optimizations
+   ================================ */
+@media (max-width: 768px) {
+  .filters-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .filter-buttons {
+    justify-content: center;
+  }
+  
+  .results-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .search-input {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* ================================
+   Search Results Highlighting
+   ================================ */
+.search-highlight {
+  background-color: yellow;
+  font-weight: bold;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* ================================
+   Pagination (if needed)
+   ================================ */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xl);
+}
+
+.pagination-btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  background-color: var(--background-primary);
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.pagination-btn:hover {
+  border-color: var(--primary-color);
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.pagination-btn.active {
+  border-color: var(--primary-color);
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

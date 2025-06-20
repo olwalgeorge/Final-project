@@ -1,0 +1,59 @@
+{
+  "app": {
+    "name": "Kitoweo Recipe App",
+    "version": "2.0.0",
+    "description": "Find & Plan Your Perfect Meals",
+    "author": "WDD330 Student",
+    "architecture": "modular"
+  },
+  "api": {
+    "spoonacular": {
+      "baseUrl": "https://api.spoonacular.com/recipes",
+      "enabled": true,
+      "fallbackToMock": true
+    }
+  },
+  "features": {
+    "search": {
+      "enabled": true,
+      "maxResults": 12,
+      "defaultSort": "relevance"
+    },
+    "mealPlanner": {
+      "enabled": true,
+      "maxWeeks": 4
+    },
+    "shoppingList": {
+      "enabled": true,
+      "autoGenerate": true
+    },
+    "favorites": {
+      "enabled": true,
+      "storage": "localStorage"
+    }
+  },
+  "ui": {
+    "theme": {
+      "primary": "#ff6b35",
+      "secondary": "#4caf50",
+      "accent": "#2196f3"
+    },
+    "animations": {
+      "enabled": true,
+      "duration": "normal"
+    },
+    "responsiveBreakpoints": {
+      "mobile": "768px",
+      "tablet": "1024px",
+      "desktop": "1200px"
+    }
+  },
+  "performance": {
+    "lazyLoading": true,
+    "imageOptimization": true,
+    "caching": {
+      "enabled": true,
+      "ttl": 300000
+    }
+  }
+}

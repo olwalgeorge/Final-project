@@ -1,0 +1,261 @@
+/**
+ * Header and Navigation Components
+ * Responsive navigation for the Kitoweo Recipe App
+ */
+
+/* ================================
+   Header Styles
+   ================================ */
+.header {
+  background-color: var(--background-primary);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+
+/* ================================
+   Navbar Styles
+   ================================ */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) 0;
+  min-height: 60px;
+}
+
+/* ================================
+   Brand Styles
+   ================================ */
+.navbar-brand {
+  display: flex;
+  align-items: center;
+}
+
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: var(--font-size-xl);
+}
+
+.brand-link:hover {
+  color: var(--primary-color);
+}
+
+.brand-icon {
+  font-size: var(--font-size-2xl);
+}
+
+.brand-name {
+  font-family: var(--font-family-heading);
+  color: var(--primary-color);
+}
+
+/* ================================
+   Mobile Menu Toggle
+   ================================ */
+.mobile-menu-toggle {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: var(--z-dropdown);
+}
+
+.mobile-menu-toggle span {
+  width: 100%;
+  height: 3px;
+  background-color: var(--text-primary);
+  border-radius: 3px;
+  transition: all var(--transition-normal);
+  transform-origin: center;
+}
+
+.mobile-menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(7px, 7px);
+}
+
+.mobile-menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* ================================
+   Navigation Menu
+   ================================ */
+.navbar-menu {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 280px;
+  height: 100vh;
+  background-color: var(--background-primary);
+  box-shadow: var(--shadow-lg);
+  transition: right var(--transition-normal);
+  z-index: var(--z-dropdown);
+  overflow-y: auto;
+  padding-top: 80px;
+}
+
+.navbar-menu.active {
+  right: 0;
+}
+
+.navbar-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-item {
+  margin: 0;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  border-left: 3px solid transparent;
+}
+
+.nav-link:hover {
+  background-color: var(--background-secondary);
+  color: var(--primary-color);
+  border-left-color: var(--primary-color);
+}
+
+.nav-link.active {
+  background-color: rgba(255, 107, 53, 0.1);
+  color: var(--primary-color);
+  border-left-color: var(--primary-color);
+}
+
+.nav-icon {
+  font-size: var(--font-size-lg);
+  min-width: 24px;
+}
+
+.nav-text {
+  font-size: var(--font-size-base);
+}
+
+/* ================================
+   Desktop Navigation
+   ================================ */
+@media (min-width: 768px) {
+  .mobile-menu-toggle {
+    display: none;
+  }
+
+  .navbar-menu {
+    position: static;
+    width: auto;
+    height: auto;
+    background: transparent;
+    box-shadow: none;
+    padding-top: 0;
+    overflow: visible;
+  }
+
+  .navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+
+  .nav-link {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    border-left: none;
+    transition: all var(--transition-fast);
+  }
+
+  .nav-link:hover {
+    background-color: var(--background-secondary);
+    border-left: none;
+  }
+
+  .nav-link.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-left: none;
+  }
+
+  .nav-icon {
+    display: none;
+  }
+}
+
+/* ================================
+   Backdrop for Mobile Menu
+   ================================ */
+.navbar-menu.active::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: -1;
+}
+
+@media (min-width: 768px) {
+  .navbar-menu::before {
+    display: none;
+  }
+}
+
+/* ================================
+   Header Animation
+   ================================ */
+.header {
+  transform: translateY(0);
+  transition: transform var(--transition-normal);
+}
+
+.header.hidden {
+  transform: translateY(-100%);
+}
+
+/* ================================
+   Search in Header (if needed)
+   ================================ */
+.header-search {
+  display: none;
+  max-width: 300px;
+  margin: 0 var(--spacing-lg);
+}
+
+.header-search .search-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+@media (min-width: 1024px) {
+  .header-search {
+    display: block;
+  }
+}

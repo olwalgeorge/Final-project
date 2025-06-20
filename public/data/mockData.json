@@ -1,0 +1,260 @@
+{
+  "recipes": [
+    {
+      "id": 1,
+      "title": "Swahili Pilau",
+      "description": "Traditional aromatic rice dish with meat and spices",
+      "cookingTime": 45,
+      "servings": 4,
+      "calories": 420,
+      "difficulty": "intermediate",
+      "tags": ["traditional", "swahili", "rice"],
+      "dietaryInfo": [],
+      "ingredients": [
+        { "name": "Basmati rice", "amount": "2 cups", "category": "grains" },
+        { "name": "Beef", "amount": "500g", "category": "meat" },
+        { "name": "Onions", "amount": "2 large", "category": "vegetables" },
+        { "name": "Garlic", "amount": "4 cloves", "category": "aromatics" },
+        { "name": "Ginger", "amount": "1 inch piece", "category": "aromatics" },
+        { "name": "Pilau masala", "amount": "2 tbsp", "category": "spices" }
+      ],
+      "instructions": [
+        "Soak rice for 30 minutes",
+        "Brown the meat with whole spices",
+        "Add onions and cook until golden",
+        "Add rice and stock, simmer for 20 minutes"
+      ],
+      "image": "/images/recipes/swahili-pilau.jpg",
+      "mealType": ["lunch", "dinner"],
+      "cuisine": "swahili",
+      "rating": 4,
+      "source": "mock"
+    },
+    {
+      "id": 2,
+      "title": "Swahili Biryani",
+      "description": "Fragrant layered rice dish with tender meat and aromatic spices",
+      "cookingTime": 60,
+      "servings": 6,
+      "calories": 480,
+      "difficulty": "advanced",
+      "tags": ["traditional", "swahili", "rice", "layered"],
+      "dietaryInfo": [],
+      "ingredients": [
+        { "name": "Basmati rice", "amount": "3 cups", "category": "grains" },
+        { "name": "Mutton/Goat meat", "amount": "750g", "category": "meat" },
+        { "name": "Yogurt", "amount": "1 cup", "category": "dairy" },
+        { "name": "Fried onions", "amount": "1 cup", "category": "vegetables" },
+        { "name": "Saffron", "amount": "1/2 tsp", "category": "spices" },
+        { "name": "Biryani masala", "amount": "2 tbsp", "category": "spices" }
+      ],
+      "instructions": [
+        "Marinate meat in yogurt and spices",
+        "Partially cook rice with whole spices",
+        "Layer meat and rice alternately",
+        "Cook on low heat for 45 minutes"
+      ],
+      "image": "/images/recipes/swahili-biryani.jpg",
+      "mealType": ["lunch", "dinner"],
+      "cuisine": "swahili",
+      "rating": 5,
+      "source": "mock"
+    },
+    {
+      "id": 3,
+      "title": "Mbaazi wa Nazi",
+      "description": "Pigeon peas cooked in rich coconut curry sauce",
+      "cookingTime": 40,
+      "servings": 4,
+      "calories": 350,
+      "difficulty": "beginner",
+      "tags": ["traditional", "vegetarian", "coconut"],
+      "dietaryInfo": ["vegetarian", "gluten-free"],
+      "ingredients": [
+        { "name": "Pigeon peas", "amount": "2 cups", "category": "legumes" },
+        { "name": "Coconut milk", "amount": "400ml", "category": "dairy" },
+        { "name": "Onions", "amount": "1 large", "category": "vegetables" },
+        { "name": "Tomatoes", "amount": "2 medium", "category": "vegetables" },
+        { "name": "Curry powder", "amount": "1 tbsp", "category": "spices" },
+        { "name": "Coriander", "amount": "1/4 cup", "category": "herbs" }
+      ],
+      "instructions": [
+        "Soak pigeon peas overnight",
+        "Cook peas until tender",
+        "Prepare coconut curry base",
+        "Combine and simmer for 15 minutes"
+      ],
+      "image": "/images/recipes/mbaazi-wa-nazi.jpg",
+      "mealType": ["lunch", "dinner"],
+      "cuisine": "swahili",
+      "rating": 4,
+      "source": "mock"
+    },
+    {
+      "id": 4,
+      "title": "Swahili Chicken Curry",
+      "description": "Tender chicken pieces in aromatic coconut curry sauce",
+      "cookingTime": 35,
+      "servings": 4,
+      "calories": 380,
+      "difficulty": "intermediate",
+      "tags": ["traditional", "swahili", "curry", "chicken"],
+      "dietaryInfo": ["gluten-free"],
+      "ingredients": [
+        { "name": "Chicken", "amount": "1 kg", "category": "meat" },
+        { "name": "Coconut milk", "amount": "400ml", "category": "dairy" },
+        { "name": "Onions", "amount": "2 medium", "category": "vegetables" },
+        { "name": "Tomatoes", "amount": "3 medium", "category": "vegetables" },
+        { "name": "Curry powder", "amount": "2 tbsp", "category": "spices" },
+        { "name": "Ginger", "amount": "1 inch piece", "category": "aromatics" }
+      ],
+      "instructions": [
+        "Cut chicken into pieces",
+        "Sauté onions until golden",
+        "Add chicken and brown",
+        "Add coconut milk and simmer for 25 minutes"
+      ],
+      "image": "/images/recipes/swahili-chicken-curry.jpg",
+      "mealType": ["lunch", "dinner"],
+      "cuisine": "swahili",
+      "rating": 4,
+      "source": "mock"
+    },
+    {
+      "id": 5,
+      "title": "Kuku wa Nazi",
+      "description": "Traditional Swahili chicken cooked in coconut milk",
+      "cookingTime": 40,
+      "servings": 6,
+      "calories": 420,
+      "difficulty": "beginner",
+      "tags": ["traditional", "swahili", "coconut", "chicken"],
+      "dietaryInfo": ["gluten-free"],
+      "ingredients": [
+        { "name": "Chicken pieces", "amount": "1.5 kg", "category": "meat" },
+        { "name": "Coconut milk", "amount": "500ml", "category": "dairy" },
+        { "name": "Onions", "amount": "1 large", "category": "vegetables" },
+        { "name": "Garlic", "amount": "4 cloves", "category": "aromatics" },
+        { "name": "Green chilies", "amount": "2 pieces", "category": "spices" },
+        { "name": "Coriander", "amount": "1/4 cup", "category": "herbs" }
+      ],
+      "instructions": [
+        "Marinate chicken with spices",
+        "Cook onions until soft",
+        "Add chicken and cook until tender",
+        "Pour coconut milk and simmer"
+      ],
+      "image": "/images/recipes/kuku-wa-nazi.jpg",
+      "mealType": ["lunch", "dinner"],
+      "cuisine": "swahili",
+      "rating": 5,
+      "source": "mock"
+    },
+    {
+      "id": 6,
+      "title": "Chicken Biriyani",
+      "description": "Layered chicken and rice dish with aromatic spices",
+      "cookingTime": 75,
+      "servings": 8,
+      "calories": 520,
+      "difficulty": "advanced",
+      "tags": ["traditional", "chicken", "rice", "layered"],
+      "dietaryInfo": [],
+      "ingredients": [
+        { "name": "Chicken", "amount": "1 kg", "category": "meat" },
+        { "name": "Basmati rice", "amount": "3 cups", "category": "grains" },
+        { "name": "Yogurt", "amount": "1 cup", "category": "dairy" },
+        { "name": "Fried onions", "amount": "1 cup", "category": "vegetables" },
+        { "name": "Saffron", "amount": "1/2 tsp", "category": "spices" },
+        { "name": "Garam masala", "amount": "2 tbsp", "category": "spices" }
+      ],
+      "instructions": [
+        "Marinate chicken in yogurt and spices",
+        "Cook rice with whole spices until 70% done",
+        "Layer chicken and rice alternately",
+        "Cook on low heat for 45 minutes"
+      ],
+      "image": "/images/recipes/chicken-biryani.jpg",
+      "mealType": ["lunch", "dinner"],
+      "cuisine": "indian",
+      "rating": 5,
+      "source": "mock"
+    },
+    {
+      "id": 7,
+      "title": "Simple Pasta Marinara",
+      "description": "Classic Italian pasta with fresh tomato sauce",
+      "cookingTime": 25,
+      "servings": 4,
+      "calories": 320,
+      "difficulty": "beginner",
+      "tags": ["italian", "pasta", "vegetarian", "quick"],
+      "dietaryInfo": ["vegetarian"],
+      "ingredients": [
+        { "name": "Pasta", "amount": "400g", "category": "grains" },
+        { "name": "Tomatoes", "amount": "6 large", "category": "vegetables" },
+        { "name": "Garlic", "amount": "4 cloves", "category": "aromatics" },
+        { "name": "Basil", "amount": "1/4 cup", "category": "herbs" },
+        { "name": "Olive oil", "amount": "3 tbsp", "category": "oils" },
+        { "name": "Parmesan cheese", "amount": "1/2 cup", "category": "dairy" }
+      ],
+      "instructions": [
+        "Cook pasta according to package directions",
+        "Sauté garlic in olive oil",
+        "Add tomatoes and simmer for 15 minutes",
+        "Toss with pasta and fresh basil"
+      ],
+      "image": "/images/recipes/pasta-marinara.jpg",
+      "mealType": ["lunch", "dinner"],
+      "cuisine": "italian",
+      "rating": 4,
+      "source": "mock"
+    },
+    {
+      "id": 8,
+      "title": "Chocolate Chip Cookies",
+      "description": "Soft and chewy homemade chocolate chip cookies",
+      "cookingTime": 30,
+      "servings": 24,
+      "calories": 180,
+      "difficulty": "beginner",
+      "tags": ["dessert", "cookies", "chocolate", "baking"],
+      "dietaryInfo": ["vegetarian"],
+      "ingredients": [
+        { "name": "Flour", "amount": "2 cups", "category": "grains" },
+        { "name": "Butter", "amount": "1 cup", "category": "dairy" },
+        { "name": "Brown sugar", "amount": "3/4 cup", "category": "sweeteners" },
+        { "name": "Eggs", "amount": "2 large", "category": "dairy" },
+        { "name": "Chocolate chips", "amount": "2 cups", "category": "chocolate" },
+        { "name": "Vanilla extract", "amount": "2 tsp", "category": "flavorings" }
+      ],
+      "instructions": [
+        "Cream butter and sugars",
+        "Add eggs and vanilla",
+        "Mix in flour gradually",
+        "Fold in chocolate chips and bake for 12 minutes"
+      ],
+      "image": "/images/recipes/chocolate-chip-cookies.jpg",
+      "mealType": ["dessert"],
+      "cuisine": "american",
+      "rating": 5,
+      "source": "mock"
+    }
+  ],
+  "categories": [
+    { "id": "breakfast", "name": "Breakfast", "icon": "🍳", "color": "#FF6B35" },
+    { "id": "lunch", "name": "Lunch", "icon": "🥗", "color": "#4CAF50" },
+    { "id": "dinner", "name": "Dinner", "icon": "🍽️", "color": "#2196F3" },
+    { "id": "dessert", "name": "Desserts", "icon": "🍰", "color": "#E91E63" },
+    { "id": "snack", "name": "Snacks", "icon": "🥨", "color": "#FF9800" },
+    { "id": "drink", "name": "Drinks", "icon": "🥤", "color": "#9C27B0" }
+  ],
+  "cuisines": [
+    { "id": "swahili", "name": "Swahili", "flag": "🇰🇪" },
+    { "id": "indian", "name": "Indian", "flag": "🇮🇳" },
+    { "id": "italian", "name": "Italian", "flag": "🇮🇹" },
+    { "id": "american", "name": "American", "flag": "🇺🇸" },
+    { "id": "mexican", "name": "Mexican", "flag": "🇲🇽" },
+    { "id": "chinese", "name": "Chinese", "flag": "🇨🇳" }
+  ]
+}

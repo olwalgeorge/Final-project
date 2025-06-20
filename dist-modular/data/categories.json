@@ -1,0 +1,46 @@
+{
+  "categories": [
+    {
+      "id": "breakfast",
+      "name": "Breakfast",
+      "icon": "🍳",
+      "color": "#FF6B35",
+      "description": "Start your day with delicious morning meals"
+    },
+    {
+      "id": "lunch",
+      "name": "Lunch",
+      "icon": "🥗",
+      "color": "#4CAF50",
+      "description": "Satisfying midday meals and light dishes"
+    },
+    {
+      "id": "dinner",
+      "name": "Dinner",
+      "icon": "🍽️",
+      "color": "#2196F3",
+      "description": "Hearty evening meals for the whole family"
+    },
+    {
+      "id": "dessert",
+      "name": "Desserts",
+      "icon": "🍰",
+      "color": "#E91E63",
+      "description": "Sweet treats and indulgent desserts"
+    },
+    {
+      "id": "snack",
+      "name": "Snacks",
+      "icon": "🥨",
+      "color": "#FF9800",
+      "description": "Quick bites and appetizers"
+    },
+    {
+      "id": "drink",
+      "name": "Drinks",
+      "icon": "🥤",
+      "color": "#9C27B0",
+      "description": "Refreshing beverages and cocktails"
+    }
+  ]
+}

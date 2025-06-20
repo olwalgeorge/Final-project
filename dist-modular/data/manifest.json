@@ -1,0 +1,66 @@
+{
+  "manifest": {
+    "version": "2.0.0",
+    "lastUpdated": "2025-06-20",
+    "architecture": "modular",
+    "description": "Kitoweo Recipe App - Modular data structure with externalized JSON files"
+  },
+  "dataFiles": {
+    "recipes": {
+      "file": "/data/mockData.json",
+      "description": "Main recipe database with ingredients and instructions",
+      "lastUpdated": "2025-06-20",
+      "recordCount": 8
+    },
+    "categories": {
+      "file": "/data/categories.json",
+      "description": "Recipe categories with icons and descriptions",
+      "lastUpdated": "2025-06-20",
+      "recordCount": 6
+    },
+    "cuisines": {
+      "file": "/data/cuisines.json",
+      "description": "World cuisines with flags and popular dishes",
+      "lastUpdated": "2025-06-20",
+      "recordCount": 8
+    },
+    "dietary": {
+      "file": "/data/dietary.json",
+      "description": "Dietary restrictions and special diets",
+      "lastUpdated": "2025-06-20",
+      "recordCount": 8
+    },
+    "config": {
+      "file": "/data/config.json",
+      "description": "Application configuration and feature flags",
+      "lastUpdated": "2025-06-20"
+    }
+  },
+  "api": {
+    "endpoints": {
+      "recipes": "/data/mockData.json",
+      "categories": "/data/categories.json",
+      "cuisines": "/data/cuisines.json",
+      "dietary": "/data/dietary.json",
+      "config": "/data/config.json",
+      "manifest": "/data/manifest.json"
+    }
+  },
+  "features": {
+    "staticAssets": {
+      "css": "/css/",
+      "images": "/images/",
+      "data": "/data/"
+    },
+    "modularArchitecture": {
+      "partials": "/src/views/partials/",
+      "pages": "/src/views/pages/",
+      "services": "/src/js/"
+    }
+  },
+  "cache": {
+    "strategy": "memory",
+    "ttl": 300000,
+    "maxSize": 100
+  }
+}

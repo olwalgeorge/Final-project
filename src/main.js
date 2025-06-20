@@ -586,19 +586,308 @@ class KitoweoApp {
       `;
     }
   }
-
   async loadRecipeDetail(recipeId) {
-    const mainContent = qs('#main-content');
-    mainContent.innerHTML = `
-      <section class="recipe-detail">
-        <div class="container">
-          <h1>Recipe Detail</h1>
-          <p>Recipe ID: ${recipeId}</p>
-          <p>Detailed recipe view coming soon!</p>
-          <a href="#recipes" class="btn btn-primary">Back to Recipes</a>
-        </div>
-      </section>
-    `;
+    try {
+      const mainContent = qs('#main-content');
+
+      // Show loading state
+      mainContent.innerHTML = `
+        <section class="recipe-detail-loading">
+          <div class="container">
+            <div class="text-center">
+              <div class="loading-spinner"></div>
+              <p>Loading recipe details...</p>
+            </div>
+          </div>
+        </section>
+      `;
+
+      // Fetch recipe details
+      const recipe = await this.dataSource.getRecipeById(parseInt(recipeId));
+
+      if (!recipe) {
+        mainContent.innerHTML = `
+          <section class="recipe-not-found">
+            <div class="container text-center">
+              <h1>Recipe Not Found</h1>
+              <p>Sorry, we couldn't find the recipe you're looking for.</p>
+              <a href="#recipes" class="btn btn-primary">Back to Recipes</a>
+            </div>
+          </section>
+        `;
+        return;
+      }
+
+      // Create detailed recipe view
+      mainContent.innerHTML = `
+        <section class="recipe-detail">
+          <div class="container">
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+              <a href="#home">Home</a> › 
+              <a href="#recipes">Recipes</a> › 
+              <span>${recipe.title}</span>
+            </nav>
+
+            <!-- Recipe Header -->
+            <div class="recipe-header">
+              <div class="recipe-image-container">
+                <img src="${recipe.image || '/images/placeholders/recipe-placeholder.jpg'}" 
+                     alt="${recipe.title}" 
+                     class="recipe-image"
+                     onerror="this.src='/images/placeholders/recipe-placeholder.jpg'">
+                <div class="recipe-badges">
+                  ${recipe.difficulty ? `<span class="badge badge-${recipe.difficulty}">${recipe.difficulty}</span>` : ''}
+                  ${recipe.cuisine ? `<span class="badge badge-cuisine">${recipe.cuisine}</span>` : ''}
+                  ${
+                    recipe.dietaryInfo && recipe.dietaryInfo.length > 0
+                      ? recipe.dietaryInfo
+                          .map((diet) => `<span class="badge badge-diet">${diet}</span>`)
+                          .join('')
+                      : ''
+                  }
+                </div>
+              </div>
+              
+              <div class="recipe-info">
+                <h1 class="recipe-title">${recipe.title}</h1>
+                <p class="recipe-description">${recipe.description}</p>
+                
+                <div class="recipe-meta">
+                  <div class="meta-item">
+                    <span class="meta-icon">⏱️</span>
+                    <span class="meta-label">Prep Time</span>
+                    <span class="meta-value">${recipe.cookingTime} min</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-icon">👥</span>
+                    <span class="meta-label">Servings</span>
+                    <span class="meta-value">${recipe.servings}</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-icon">🔥</span>
+                    <span class="meta-label">Calories</span>
+                    <span class="meta-value">${recipe.calories} per serving</span>
+                  </div>
+                  ${
+                    recipe.rating
+                      ? `
+                  <div class="meta-item">
+                    <span class="meta-icon">⭐</span>
+                    <span class="meta-label">Rating</span>
+                    <span class="meta-value">${'⭐'.repeat(recipe.rating)} (${recipe.rating}/5)</span>
+                  </div>
+                  `
+                      : ''
+                  }
+                </div>
+
+                <div class="recipe-actions">
+                  <button class="btn btn-primary add-to-meal-plan" data-recipe-id="${recipe.id}">
+                    📅 Add to Meal Plan
+                  </button>
+                  <button class="btn btn-secondary save-recipe" data-recipe-id="${recipe.id}">
+                    💾 Save Recipe
+                  </button>
+                  <button class="btn btn-ghost share-recipe" data-recipe-id="${recipe.id}">
+                    📤 Share
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recipe Content -->
+            <div class="recipe-content">
+              <div class="recipe-main">
+                <!-- Ingredients -->
+                <div class="recipe-section">
+                  <h2>Ingredients</h2>
+                  <div class="ingredients-list">
+                    ${
+                      recipe.ingredients && recipe.ingredients.length > 0
+                        ? recipe.ingredients
+                            .map(
+                              (ingredient) => `
+                        <div class="ingredient-item">
+                          <input type="checkbox" id="ingredient-${ingredient.name.replace(/\s+/g, '-')}" class="ingredient-checkbox">
+                          <label for="ingredient-${ingredient.name.replace(/\s+/g, '-')}">
+                            <span class="ingredient-amount">${ingredient.amount}</span>
+                            <span class="ingredient-name">${ingredient.name}</span>
+                          </label>
+                        </div>
+                      `
+                            )
+                            .join('')
+                        : '<p>Ingredients list not available.</p>'
+                    }
+                  </div>
+                  <button class="btn btn-secondary add-to-shopping-list" data-recipe-id="${recipe.id}">
+                    🛒 Add All to Shopping List
+                  </button>
+                </div>
+
+                <!-- Instructions -->
+                <div class="recipe-section">
+                  <h2>Instructions</h2>
+                  <div class="instructions-list">
+                    ${
+                      recipe.instructions && recipe.instructions.length > 0
+                        ? recipe.instructions
+                            .map(
+                              (step, index) => `
+                        <div class="instruction-step">
+                          <div class="step-number">${index + 1}</div>
+                          <div class="step-content">${step}</div>
+                        </div>
+                      `
+                            )
+                            .join('')
+                        : '<p>Instructions not available.</p>'
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Recipe Sidebar -->
+              <div class="recipe-sidebar">
+                <!-- Tags -->
+                ${
+                  recipe.tags && recipe.tags.length > 0
+                    ? `
+                <div class="recipe-section">
+                  <h3>Tags</h3>
+                  <div class="recipe-tags">
+                    ${recipe.tags.map((tag) => `<span class="tag">#${tag}</span>`).join('')}
+                  </div>
+                </div>
+                `
+                    : ''
+                }
+
+                <!-- Nutrition Info -->
+                ${
+                  recipe.nutrition
+                    ? `
+                <div class="recipe-section">
+                  <h3>Nutrition (per serving)</h3>
+                  <div class="nutrition-info">
+                    ${Object.entries(recipe.nutrition)
+                      .map(
+                        ([key, value]) => `
+                      <div class="nutrition-item">
+                        <span class="nutrition-label">${key}</span>
+                        <span class="nutrition-value">${value}</span>
+                      </div>
+                    `
+                      )
+                      .join('')}
+                  </div>
+                </div>
+                `
+                    : ''
+                }
+
+                <!-- Recipe Source -->
+                ${
+                  recipe.sourceUrl
+                    ? `
+                <div class="recipe-section">
+                  <h3>Recipe Source</h3>
+                  <a href="${recipe.sourceUrl}" target="_blank" class="source-link">
+                    View Original Recipe
+                  </a>
+                  ${recipe.creditsText ? `<p class="source-credit">${recipe.creditsText}</p>` : ''}
+                </div>
+                `
+                    : ''
+                }
+              </div>
+            </div>
+
+            <!-- Back Button -->
+            <div class="recipe-footer">
+              <a href="#recipes" class="btn btn-ghost">← Back to Recipes</a>
+            </div>
+          </div>
+        </section>
+      `;
+
+      // Initialize recipe detail interactions
+      this.initializeRecipeDetailEvents(recipe);
+    } catch (error) {
+      console.error('Error loading recipe detail:', error);
+      mainContent.innerHTML = `
+        <section class="recipe-error">
+          <div class="container text-center">
+            <h1>Error Loading Recipe</h1>
+            <p>Sorry, there was an error loading the recipe details.</p>
+            <a href="#recipes" class="btn btn-primary">Back to Recipes</a>
+          </div>
+        </section>
+      `;
+    }
+  }
+
+  initializeRecipeDetailEvents(recipe) {
+    // Add to meal plan functionality
+    const addToMealPlanBtn = qs('.add-to-meal-plan');
+    if (addToMealPlanBtn) {
+      addToMealPlanBtn.addEventListener('click', () => {
+        // This would integrate with meal planner
+        alert(`Added "${recipe.title}" to meal plan!`);
+      });
+    }
+
+    // Save recipe functionality
+    const saveRecipeBtn = qs('.save-recipe');
+    if (saveRecipeBtn) {
+      saveRecipeBtn.addEventListener('click', () => {
+        // This would save to local storage or user account
+        alert(`Saved "${recipe.title}" to your favorites!`);
+      });
+    }
+
+    // Share recipe functionality
+    const shareRecipeBtn = qs('.share-recipe');
+    if (shareRecipeBtn) {
+      shareRecipeBtn.addEventListener('click', () => {
+        if (navigator.share) {
+          navigator.share({
+            title: recipe.title,
+            text: recipe.description,
+            url: window.location.href,
+          });
+        } else {
+          // Fallback: copy to clipboard
+          navigator.clipboard.writeText(window.location.href);
+          alert('Recipe link copied to clipboard!');
+        }
+      });
+    }
+
+    // Add to shopping list functionality
+    const addToShoppingListBtn = qs('.add-to-shopping-list');
+    if (addToShoppingListBtn) {
+      addToShoppingListBtn.addEventListener('click', () => {
+        // This would integrate with shopping list
+        alert(`Added all ingredients from "${recipe.title}" to shopping list!`);
+      });
+    }
+
+    // Ingredient checkbox functionality
+    const ingredientCheckboxes = document.querySelectorAll('.ingredient-checkbox');
+    ingredientCheckboxes.forEach((checkbox) => {
+      checkbox.addEventListener('change', (e) => {
+        const label = e.target.nextElementSibling;
+        if (e.target.checked) {
+          label.style.textDecoration = 'line-through';
+          label.style.opacity = '0.6';
+        } else {
+          label.style.textDecoration = 'none';
+          label.style.opacity = '1';
+        }
+      });
+    });
   }
 
   async loadHomePage() {

@@ -1,0 +1,60 @@
+{
+  "cuisines": [
+    {
+      "id": "swahili",
+      "name": "Swahili",
+      "flag": "🇰🇪",
+      "description": "Traditional East African coastal cuisine with aromatic spices",
+      "popularDishes": ["Pilau", "Biryani", "Mbaazi wa Nazi"]
+    },
+    {
+      "id": "indian",
+      "name": "Indian",
+      "flag": "🇮🇳",
+      "description": "Rich and diverse flavors from the Indian subcontinent",
+      "popularDishes": ["Curry", "Biryani", "Tandoori"]
+    },
+    {
+      "id": "italian",
+      "name": "Italian",
+      "flag": "🇮🇹",
+      "description": "Classic Mediterranean cuisine with fresh ingredients",
+      "popularDishes": ["Pasta", "Pizza", "Risotto"]
+    },
+    {
+      "id": "american",
+      "name": "American",
+      "flag": "🇺🇸",
+      "description": "Comfort food and innovative fusion cuisine",
+      "popularDishes": ["Burgers", "BBQ", "Apple Pie"]
+    },
+    {
+      "id": "mexican",
+      "name": "Mexican",
+      "flag": "🇲🇽",
+      "description": "Vibrant and spicy flavors with fresh herbs",
+      "popularDishes": ["Tacos", "Enchiladas", "Guacamole"]
+    },
+    {
+      "id": "chinese",
+      "name": "Chinese",
+      "flag": "🇨🇳",
+      "description": "Ancient culinary traditions with balanced flavors",
+      "popularDishes": ["Stir Fry", "Dumplings", "Hot Pot"]
+    },
+    {
+      "id": "japanese",
+      "name": "Japanese",
+      "flag": "🇯🇵",
+      "description": "Elegant and minimalist cuisine emphasizing freshness",
+      "popularDishes": ["Sushi", "Ramen", "Tempura"]
+    },
+    {
+      "id": "french",
+      "name": "French",
+      "flag": "🇫🇷",
+      "description": "Sophisticated culinary techniques and rich flavors",
+      "popularDishes": ["Coq au Vin", "Croissants", "Bouillabaisse"]
+    }
+  ]
+}

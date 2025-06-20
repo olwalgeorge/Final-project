@@ -1,0 +1,111 @@
+/**
+ * Home Page Specific Styles
+ * Styles specific to the homepage layout and components
+ */
+
+/* ================================
+   Home Page Layout
+   ================================ */
+.home-page .hero {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #e55a2b 100%);
+}
+
+.home-page .quick-filters {
+  background: linear-gradient(to bottom, var(--background-secondary), var(--background-primary));
+}
+
+/* ================================
+   Featured Recipes Section
+   ================================ */
+.featured-recipes {
+  position: relative;
+}
+
+.featured-recipes::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border-color), transparent);
+}
+
+/* ================================
+   Quick Filter Cards Animation
+   ================================ */
+.filter-card {
+  animation: fadeInUp 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.filter-card:nth-child(1) { animation-delay: 0.1s; }
+.filter-card:nth-child(2) { animation-delay: 0.2s; }
+.filter-card:nth-child(3) { animation-delay: 0.3s; }
+.filter-card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================================
+   Category Grid Responsive
+   ================================ */
+@media (max-width: 480px) {
+  .categories-grid,
+  .cuisines-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .category-card,
+  .cuisine-card {
+    padding: var(--spacing-lg);
+  }
+  
+  .category-icon,
+  .cuisine-flag {
+    font-size: 2rem;
+  }
+}
+
+/* ================================
+   Hero Section Animation
+   ================================ */
+.hero-content {
+  animation: fadeIn 1s ease-out;
+}
+
+.hero-title {
+  animation: slideInFromTop 0.8s ease-out;
+}
+
+.hero-description {
+  animation: slideInFromTop 0.8s ease-out 0.2s both;
+}
+
+.hero-actions {
+  animation: slideInFromTop 0.8s ease-out 0.4s both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "dietary": [
+    {
+      "id": "vegetarian",
+      "name": "Vegetarian",
+      "icon": "🥬",
+      "color": "#4CAF50",
+      "description": "Plant-based recipes with no meat or fish"
+    },
+    {
+      "id": "vegan",
+      "name": "Vegan",
+      "icon": "🌱",
+      "color": "#2E7D32",
+      "description": "Completely plant-based with no animal products"
+    },
+    {
+      "id": "gluten-free",
+      "name": "Gluten-Free",
+      "icon": "🌾",
+      "color": "#FF9800",
+      "description": "Recipes without wheat, barley, or rye"
+    },
+    {
+      "id": "dairy-free",
+      "name": "Dairy-Free",
+      "icon": "🥛",
+      "color": "#795548",
+      "description": "Recipes without milk, cheese, or dairy products"
+    },
+    {
+      "id": "keto",
+      "name": "Keto",
+      "icon": "🥑",
+      "color": "#388E3C",
+      "description": "Low-carb, high-fat ketogenic diet recipes"
+    },
+    {
+      "id": "paleo",
+      "name": "Paleo",
+      "icon": "🦴",
+      "color": "#8D6E63",
+      "description": "Recipes following the paleolithic diet principles"
+    },
+    {
+      "id": "low-sodium",
+      "name": "Low Sodium",
+      "icon": "🧂",
+      "color": "#607D8B",
+      "description": "Heart-healthy recipes with reduced salt content"
+    },
+    {
+      "id": "high-protein",
+      "name": "High Protein",
+      "icon": "💪",
+      "color": "#F44336",
+      "description": "Protein-rich recipes for fitness and muscle building"
+    }
+  ]
+}
